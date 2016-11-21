@@ -1,0 +1,206 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8"/>
+    <title>URI template test</title>
+    <style>
+      .good {color: black}
+      .bad {color: red}
+      form {
+        background-color: #f7f7f9;
+        padding: .5rem .75rem;
+        border-radius: .25rem;
+      }
+      input {
+        display: inline-block;
+        width: 300px;
+        vertical-align: middle;
+        padding: .5rem .75rem;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #55595c;
+        background-color: #fff;
+        background-image: none;
+        -webkit-background-clip: padding-box;
+        background-clip: padding-box;
+        border: 1px solid rgba(0,0,0,.15);
+        border-radius: .25rem;
+      }
+      button {
+        color: #fff;
+        background-color: #0275d8;
+        border-color: #0275d8;
+        display: inline-block;
+        font-weight: 400;
+        line-height: 1.25;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        border: 1px solid transparent;
+        padding: .5rem 1rem;
+        font-size: 1rem;
+        border-radius: .25rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table, th, td {
+        border: 1px solid #ddd;
+      }
+      table th {
+        background-color: #f7f7f9;
+        padding: 3px;
+      }
+      table td {
+        padding: 3px;
+      }
+      table .success {
+        background-color: #DFF0D8;
+      }
+      table .failed {
+        background-color: #F2DEE0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>URI template tests</h1>
+    <p id="statistic"/>
+    <script type="text/javascript" src="URI.js"></script>
+    <script type="text/javascript" src="uri_template.js"></script>
+    <script>
+    var tableRef;
+    var totalTests = 0;
+    var successTests = 0;
+
+    function printResult(item1, item2, expected, isUser) {
+      var newRow = tableRef.insertRow(tableRef.rows.length);
+      var insertCell = function(col, text, addDebuger) {
+        var newCell = newRow.insertCell(col);
+        var newText = document.createTextNode(text);
+        newCell.appendChild(newText);
+        if (addDebuger)
+          newCell.addEventListener('click', function() {
+            debugger;
+            templateForUris(new URI(item1), new URI(item2));
+          });
+        return newCell;
+      }
+      var cell0 = insertCell(0, item1);
+      var cell1 = insertCell(1, item2);
+      try {
+        var text = templateForUris(new URI(item1), new URI(item2));
+        if (isUser) {
+          insertCell(2, text, addDebuger = true);
+          insertCell(3, text.toRegexp());
+        }
+        else {
+          ++totalTests;
+          if (String(text).toUpperCase() === String(expected).toUpperCase()) {
+            insertCell(2, text, addDebuger = true);
+            newRow.className = "success";
+            var success = true;
+            var expr = '^' + text.toRegexp() + "$";
+            if (!item1.match(expr)) {
+              cell0.className = "failed";
+              cell0.title = expr;
+              success = false;
+            }
+            if (!item2.match(expr)) {
+              cell1.className = "failed";
+              cell1.title = expr;
+              success = false;
+            }
+            if (success)
+              ++successTests;
+          }
+          else {
+            insertCell(2, text, addDebuger = true);
+            newRow.className = "failed";
+          }
+        }
+      }
+      catch (err) {
+        insertCell(2, err);
+        newRow.className = "failed";
+      }
+      if (!isUser)
+        insertCell(3, expected);
+    }
+
+    function Calculate(){
+      printResult(document.getElementById('url1').value, document.getElementById('url2').value, "", true);
+    }
+
+    function startSection(title, isUser) {
+      var createAndInsert = function(type, parent) {
+        var elem = document.createElement(type);
+        parent.appendChild(elem);
+        return elem;
+      }
+      var createAndInsertWithText = function(type, text, parent) {
+        createAndInsert(type, parent).appendChild(document.createTextNode(text));
+      }
+      var body = document.getElementsByTagName('body')[0];
+      createAndInsertWithText("H2", title, body);
+
+      var table = document.createElement('table');
+      var head = createAndInsert('thead', table);
+      createAndInsertWithText("th", "URI 1", head);
+      createAndInsertWithText("th", "URI 2", head);
+      createAndInsertWithText("th", "Actual template", head);
+      if (!isUser)
+        createAndInsertWithText("th", "Expected template", head);
+      else
+        createAndInsertWithText("th", "Regexp template", head);
+      tableRef = createAndInsert('tbody', table);
+      body.appendChild(table);
+    }    
+
+    startSection("Path");
+    printResult("http://bash.im/item-1.html", "http://bash.im/item-2.html", "http://bash.im/item-{N}.html");
+    printResult("http://bash.im/item1", "http://bash.im/item2", "http://bash.im/item{N}");
+    printResult("http://bash.im/tv.html", "http://bash.im/music.html", "http://bash.im/{T}.html");
+    printResult("http://bash.im/tv/sony", "http://bash.im/music/", "http://bash.im{/}");
+    printResult("http://kotofoto.ru/shop/CID_69_3_sotovyie_telefonyi.html", "http://kotofoto.ru/shop/CID_462_2_internet_planshet.html", "http://kotofoto.ru/shop/CID_{N}_{N}_{T}.html");
+    printResult("http://www.kupikupon.ru/deals/youmagic_46479", "http://www.kupikupon.ru/deals/expert_52113", "http://www.kupikupon.ru/deals/{T}_{N}");
+    printResult("http://www.afisha.ru/msk/shop/10", "http://www.afisha.ru/msk/cafe", "http://www.afisha.ru/msk{/}");
+    printResult("http://www.afisha.ru/msk/shop/10", "http://www.afisha.ru/msk/shop/1", "http://www.afisha.ru/msk/shop/{N}");
+    printResult("http://bonusman.ru/actions/3-fhdsjfhd.html", "http://bonusman.ru/actions/5-jjkds.html", "http://bonusman.ru/actions/{N}-{T}.html");
+    printResult("http://vigoda.ru/woman/offer/42305/Отдых", "http://vigoda.ru/woman/offer/41312/Райский", "http://vigoda.ru/woman/offer/{N}/{T}");
+    printResult("http://bash.im/3_dogs_at_roof", "http://bash.im/15_dogs_on_roof", "http://bash.im/{N}_dogs_{T}_roof");
+    printResult("http://bash.im/15_30_mama", "http://bash.im/16_40_papa", "http://bash.im/{N}_{N}_{T}");
+
+    startSection("Query");
+    printResult("http://bash.im?par1=a&par2=c", "http://bash.im?par1=b&par2=c", "http://bash.im?par1={T}&par2=c");
+    printResult("http://bash.im?par=a&par=c", "http://bash.im?par=b&par=c", "http://bash.im?par=c&par={T}");
+    printResult("http://bash.im?par=1", "http://bash.im?par=2&any=c&beny=34", "http://bash.im?par={N}&{*}");
+    printResult("http://bash.im?our+price=10+cents", "http://bash.im?our+price=15+dollars", "http://bash.im?our+price={T}");
+
+    startSection("Subdomains");
+    printResult("http://cdn7.bash.im", "http://cdn7.bash.im", "http://cdn7.bash.im");
+    printResult("http://cdn2.bash.im", "http://cdn23.bash.im", "http://cdn{N}.bash.im");
+    printResult("http://cdn137.bash.im", "http://cdn777.bash.im", "http://cdn{N}.bash.im");
+    printResult("http://cdn23.bash.im", "http://cdn7.bash.im", "http://cdn{N}.bash.im");
+    printResult("http://cdnla.bash.im", "http://cdkne.bash.im", "http://{T}.bash.im");
+    printResult("http://cdn-la.bash.im", "http://cdn-ne.bash.im", "http://cdn-{T}.bash.im");
+
+    document.getElementById('statistic').innerText =
+      "" + totalTests + " tests runned, " + successTests + " is success, " + (totalTests - successTests) + " failed";
+
+    startSection("Your checks:", true);
+    </script>
+    <br>
+    <form id="calc">
+      <input id="url1" placeholder="url 1" value="http://cdn2.bash.im"/>
+      <input id="url2" placeholder="url 2" value="http://cdn23.bash.im"/>
+      <button type="button" onclick="Calculate()">Make template</button>
+      <p id="result"/>
+    </form>
+  </body>
+</html>
