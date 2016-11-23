@@ -6,6 +6,7 @@ const cheerio =  require('cheerio')
 const http = require('http');
 const https = require("https");
 const nodemailer = require('nodemailer');
+const later = require('later');
 
  
 const express = require('express');
@@ -66,9 +67,43 @@ app.post('/quotes', (req, res) => {
 
 
 
+app.get('/mail', (req, res) => {
+
+ 
+  send_mail();
+  console.log('mail sent')
+
+
+  res.send({ message: "sent" });
+})
 
 
 
+function send_mail() {
+
+ var smtpConfig = {
+    host: 'smtp.yandex.ru',
+    port: 465,
+    secure: true, // use SSL
+    auth: {
+        user: '----',
+        pass: '----'
+    }
+};
+  var transporter = nodemailer.createTransport(smtpConfig);
+  var mailData = {
+    from: 'mydiskmydisk@yandex.ru',
+    to: 'amantels@gmail.com',
+    subject: 'Message title',
+    text: 'Plaintext version of the message',
+    html: 'HTML version of the message'
+  };
+
+  transporter.sendMail(mailData);
+
+  console.log('mail sent')
+
+};
 
 
 
@@ -117,3 +152,6 @@ app.get("/fetch", function (req, res, next) {
 
   }
 });
+
+
+//later.setInterval(send_mail, later.parse.text('every 20 secs'));
