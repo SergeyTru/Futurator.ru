@@ -46,7 +46,7 @@ var text_field={};
 var img_field={};
 var url_field={};
 
-//console.log("root elements found: "+$(root).length);
+console.log("root elements found: "+$(root).length);
 
 for (var counter=0; counter<$(root).length; counter++)
 {

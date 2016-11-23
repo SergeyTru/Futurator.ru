@@ -1,6 +1,7 @@
  
 
 const ft = require('./ft')
+const URIlib = require('./URI')
 
 const cheerio =  require('cheerio')
 const http = require('http');
@@ -11,12 +12,12 @@ const later = require('later');
  
 const express = require('express');
 const bodyParser= require('body-parser')
-
+ 
 
 const app = express();
 
 const MongoClient = require('mongodb').MongoClient
-
+ 
 var mongo_url="mongodb://root:1234@ds159517.mlab.com:59517/test_database";
 
 var db
@@ -49,7 +50,7 @@ app.get('/', (req, res) => {
     res.render('index.ejs', {quotes: result}) 
   })
 })
-
+ 
 
 app.post('/quotes', (req, res) => {
 
@@ -75,7 +76,7 @@ app.get('/mail', (req, res) => {
 
 
   res.send({ message: "sent" });
-})
+}) 
 
 
 
@@ -107,31 +108,59 @@ function send_mail() {
 
 
 
+app.post("/fetch", function (req, res, next) {
 
+  if (req.body) {
 
-
-app.get("/fetch", function (req, res, next) {
-  if (req.query) {
-    if (req.query.url === undefined) {
+    if (req.body.url === undefined) {
       res.send({ message: "url cannot be undefined" });
     }
-    var urlPrefix = req.query.url.match(/.*?:\/\//g);
-    
-    
+    if (req.body.preference === undefined) {
+      res.send({ message: "preference cannot be undefined" });
+    }    
 
-    if (urlPrefix !== undefined && urlPrefix !== null && urlPrefix[0] === "https://") {
-      https.get(req.query.url, function (result) {
-        processResponse(result);
-      }).on('error', function (e) {
-        res.send({ message: e.message });
-      });
-    } else {
-      http.get(req.query.url, function (result) {
-        processResponse(result);
-      }).on('error', function (e) {
-        res.send({ message: e.message });
-      });
+/*
+    var urlPrefix = req.body.url.match(/.*?:\/\//g);
+    
+*/
+
+
+    var url_instance = new URIlib.URI(req.body.url);
+    var transport = (url_instance.getScheme() || "").toLowerCase() === "https"? https : http;
+
+    var httpParams = {
+      host: url_instance.getAuthority(),
+      headers: {'user-agent': 'Mozilla/5.0'},
+      path: (url_instance.getPath() || "" )+"?"+(url_instance.getQuery() || "")
     }
+
+   // console.log(url_instance.getPath());
+//res.send(httpParams);
+    
+  
+    var transpot_info=transport.get(httpParams, function (result) {
+        processResponse(result);
+      }).on('error', function (e) {
+        res.send({ message: e.message });
+      });
+
+        console.log(transpot_info);
+
+   
+    /*if (urlPrefix !== undefined && urlPrefix !== null && urlPrefix[0] === "https://") {
+      var info=  https.get(req.body.url, function (result) {
+        processResponse(result);
+      }).on('error', function (e) {
+        res.send({ message: e.message });
+      });
+    //  console.log(info);
+    } else {
+      http.get(req.body.url, function (result) {
+        processResponse(result);
+      }).on('error', function (e) {
+        res.send({ message: e.message });
+      });
+    }*/
 
     var processResponse = function (result) {
       var data = "";
@@ -139,14 +168,15 @@ app.get("/fetch", function (req, res, next) {
         data += chunk;
       });
       result.on("end", function (chunk) {
-
+     res.send(data);
+     /*
         $ = cheerio.load(data);
-
-
-        json_result=ft.check(ft.input_json);
+ 
+        search_json=JSON.parse(req.body.preference);
+        json_result=ft.check(search_json);
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify(json_result));
-
+*/
       });
     }
 
