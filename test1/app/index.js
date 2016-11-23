@@ -50,10 +50,10 @@ app.get('/', (req, res) => {
     res.render('index.ejs', {quotes: result}) 
   })
 })
- 
+
 
 app.post('/quotes', (req, res) => {
-
+ 
  //req.body
 //save_to_db={website:ft.website,input_json:ft.input_json}
   db.collection('quotes').save(req.body, (err, result) => {
@@ -168,20 +168,26 @@ app.post("/fetch", function (req, res, next) {
         data += chunk;
       });
       result.on("end", function (chunk) {
-     res.send(data);
-     /*
+   //  res.send(data);
+   console.log(data);
         $ = cheerio.load(data);
  
         search_json=JSON.parse(req.body.preference);
         json_result=ft.check(search_json);
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify(json_result));
-*/
+ 
       });
     }
 
-  }
+  } 
 });
 
 
 //later.setInterval(send_mail, later.parse.text('every 20 secs'));
+/*
+span_test='<span class="priceContainer_1rxvror" data-reactid=".2crad29vy80.0.1.0.3.2.1.0.$0.$grid_0.$0/=1$=01$15968794.$=1$15968794.0.2.0.2.0.0.0"><span class="text_1lobov3-o_O-size_regular_1n7tijc-o_O-weight_bold_1lymmfr-o_O-inline_10f0ge3" data-reactid=".2crad29vy80.0.1.0.3.2.1.0.$0.$grid_0.$0/=1$=01$15968794.$=1$15968794.0.2.0.2.0.0.0.0"><span data-pricerate="true" data-reactid=".2crad29vy80.0.1.0.3.2.1.0.$0.$grid_0.$0/=1$=01$15968794.$=1$15968794.0.2.0.2.0.0.0.0.1:1">61062</span><span data-symbolafter="true" data-reactid=".2crad29vy80.0.1.0.3.2.1.0.$0.$grid_0.$0/=1$=01$15968794.$=1$15968794.0.2.0.2.0.0.0.0.1:2">₽</span></span><span class="text_1lobov3-o_O-size_small_h25x8d-o_O-weight_light_1jo1qff-o_O-inline_10f0ge3" data-reactid=".2crad29vy80.0.1.0.3.2.1.0.$0.$grid_0.$0/=1$=01$15968794.$=1$15968794.0.2.0.2.0.0.0.1"><span data-reactid=".2crad29vy80.0.1.0.3.2.1.0.$0.$grid_0.$0/=1$=01$15968794.$=1$15968794.0.2.0.2.0.0.0.1.1:1"> </span><span data-reactid=".2crad29vy80.0.1.0.3.2.1.0.$0.$grid_0.$0/=1$=01$15968794.$=1$15968794.0.2.0.2.0.0.0.1.1:3">/ месяц</span></span></span>';
+  $ = cheerio.load(span_test);
+
+  console.log($("span[class^='priceContainer_']").text());
+  */

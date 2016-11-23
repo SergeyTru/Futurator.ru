@@ -62,7 +62,8 @@ for (var counter=0; counter<$(root).length; counter++)
 			url_field=field;	
 		
 		var field_element=$($(root)[counter]).find(field.css_path.trim());
-		
+	//	console.log("title "+field_element.text());
+//console.log("css "+field.css_path.trim());
 		
 		var reg= /\[(.*)\]/g 
 		var test = reg.exec(field.content);
