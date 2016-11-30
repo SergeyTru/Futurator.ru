@@ -14,6 +14,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }))
 
 const MongoClient = require('mongodb').MongoClient
+var ObjectID = require('mongodb').ObjectID; 
 
 var mongo_url = "mongodb://root:1234@ds159517.mlab.com:59517/test_database";
 
@@ -28,24 +29,16 @@ MongoClient.connect(mongo_url, (err, database) => {
         console.log('listening on 3000')
     })
 })
-/*
-app.post('/save', (req, res) => {
-  db.collection('airbnb.requests').update({}, { $push: { 'requests': req.body } }, (err, result) => {
-    if (err) {
-      res.send({ error: err });
-      return 0;
-    }
 
-    console.log('saved to database')
-    res.send({ message: "ok" });
-    return 1;
-  })
-})
-*/
 
+ 
 app.post('/save', (req, res) => {
     //TODO: check that request contains airbnb and mail is not empty
-    db.collection('airbnb.requests').save(req.body, (err, result) => {
+var json=req.body;
+json.url=json.url.trim();
+json.email=json.email.trim();
+
+    db.collection('airbnb.requests').save(json, (err, result) => {
         if (err)
             return console.log(err)
 
@@ -53,6 +46,10 @@ app.post('/save', (req, res) => {
         res.redirect('/')
     })
 })
+
+
+
+
 
 function render_url(url) {
     var url_instance = new URIlib.URI(url);
@@ -69,7 +66,12 @@ function render_url(url) {
 
 app.get('/', (req, res) => {
 
-    res.render('index.ejs', {})
+db.collection('airbnb.requests').find().toArray(function(err, results) {
+   
+  res.render('index.ejs', {requests:results});
+})
+
+    
 })
 
 
@@ -78,8 +80,17 @@ app.get('/showmail', (req, res) => {
 })
 
 
+ 
 
+app.post('/set_active', (req, res) => {
 
+    db.collection('airbnb.requests').findOneAndUpdate({_id: ObjectID(req.body.request_id)}, { $set: { active: req.body.new_active_state } }, (err, result) => {
+    console.log("Yahoo! " + err + " / " + result);
+    console.log(result);
+    });
+     res.redirect('/');
+});
+ 
 
 
 
@@ -100,8 +111,7 @@ app.get('/sendmail', (req, res) => {
 
 
 
-
-
+ 
 
 
 
@@ -112,13 +122,15 @@ function send_mail(html) {
         port: 465,
         secure: true, // use SSL
         auth: {
+            user: '-----',
+            pass: '-----'
         }
     };
     var transporter = nodemailer.createTransport(smtpConfig);
     var mailData = {
         from: 'mydiskmydisk@yandex.ru',
         to: 'amantels@gmail.com',
-        subject: 'FUTUBNB',
+        subject: 'New findings on Super BnB',
         text: 'Only HTML here, sorry',
         html: html
     };
@@ -166,7 +178,7 @@ function fetch_bnb(url, resourse,final_json) {
 */
 
 var processResponse = function(result, resourse, final_json, url_instance) {
-    console.log("processing");
+    //console.log("processing");
     var data = "";
     result.on("data", function(chunk) {
         data += chunk;
@@ -199,21 +211,13 @@ var processResponse = function(result, resourse, final_json, url_instance) {
         final_json.found_on_page = data.metadata.pagination.result_count;
         final_json.max_on_page = 18
         final_json.total = data.metadata.listings_count;
-        //  final_json.global_data=results;
         page = url_instance.parseQuery().getParam("page");
-        console.log(page);
+        //console.log(page);
         if (page === null)
             page = 1;
-        console.log("processing page "+page);    
+        //console.log("processing page "+page);    
  
-/*
-          
-        console.log("final_json.total "+final_json.total);       
-        console.log("founded "+final_json.found_on_page*1 + final_json.max_on_page * (page*1 - 1));
-        console.log("final_json.found_on_page "+final_json.found_on_page);
-        console.log("final_json.max_on_page "+final_json.max_on_page);
-*/
-        //26=="6"+"10+2" 612 
+ 
         if (final_json.total === final_json.found_on_page*1 + final_json.max_on_page * (page*1 - 1)) {
             //finished
             resourse.setHeader('Content-Type', 'application/json');
@@ -221,7 +225,7 @@ var processResponse = function(result, resourse, final_json, url_instance) {
         } else {
             //load more
             var new_url=url_instance.toString().replace(/&page=\d*/,"&page="+(page*1+1));
-            console.log("load more "+new_url);
+           // console.log("load more "+new_url);
             //resourse.setHeader('Content-Type', 'application/json');
             //resourse.send(final_json);
             fetch_bnb(new_url, resourse, final_json);
