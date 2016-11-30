@@ -253,3 +253,27 @@ app.post("/fetch", function(req, res, next) {
 
     }
 });
+
+
+function doCrawl(url) {
+  var result = [];
+  for (var i = Math.random()*5 + 1; i >=0; --i) {
+      result.push({url: "http://airbnb.com/room-" + Math.random(), text: "Super flat " + Math.random(), img: "http://airbnb.com/img-" + Math.random() + ".png"});
+  }
+  return result;
+}
+
+app.get("/crawl", function(req, res, next) {
+
+    db.collection('airbnb.requests').find({active: { $eq: "1" }}).toArray((err, result) => {
+       var zz = result.map(elem => {
+          var crawled = doCrawl(elem.url);
+          //TODO: filter new hotels here
+          db.collection('airbnb.requests').update({_id: ObjectID(elem._id)}, { $push: { 'requests': { $each: crawled } } }, (err, result) => {});
+          return crawled;
+       });
+       res.send(zz);
+    });
+});
+
+
