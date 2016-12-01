@@ -33,14 +33,10 @@ MongoClient.connect(mongo_url, (err, database) => {
 
 
 
-
-
 app.get('/', (req, res) => {
     db.collection('airbnb.requests').find().toArray(function (err, results) {
-
         res.render('index.ejs', { requests: results });
     })
-
 
 })
 
@@ -72,7 +68,6 @@ app.post('/save', (req, res) => {
 
 
 app.post('/set_active', (req, res) => {
-
     db.collection('airbnb.requests').findOneAndUpdate({ _id: ObjectID(req.body.request_id) }, { $set: { active: req.body.new_active_state } }, (err, result) => {
         console.log("Yahoo! " + err + " / " + result);
         console.log(result);
@@ -82,21 +77,26 @@ app.post('/set_active', (req, res) => {
 
 
 
-
-
 app.get('/sendmail', (req, res) => {
-    send_mail_from_DB(res, true);
+    sendMailDB(res, true);
+    res.redirect('/');
 });
 
 
+function logError(err, result) {
+    if (err) {
+      console.log("");
+      console.log("Error: ");
+      console.log(err);
+      console.trace();
+      console.log("");
+    }
+}
 
 
 
-
-
-function render_url(url) {
+function renderUrl(url) {
     var url_instance = new URIlib.URI(url);
-
     path = url_instance.getPath();
     query = url_instance.getQuery()
     location = "&location=" + path.substring(3, path.length);
@@ -105,17 +105,41 @@ function render_url(url) {
 }
 
 
+function sendMailDB(res, del) {
+    db.collection('airbnb.tomail').find().toArray(function (err, results) {
+        results.forEach(function (elem) {
 
 
-function send_mail(email, html) {
+            res.render('mail.ejs', { json_data: elem.responses }, function (err, html) {
+
+                if (err == null) {
+                    if (sendMail(elem.email, html))
+                        if (del)
+                            db.collection('airbnb.tomail').deleteOne({ _id: elem._id }, logError);
+                } else {
+                    console.log(err);
+                }
+            });
+
+
+        });
+
+        res.send({ message: "ok" });
+    })
+}
+
+
+
+function sendMail(email, html) {
 
     var smtpConfig = {
         host: 'smtp.yandex.ru',
         port: 465,
         secure: true, // use SSL
         auth: {
-            user: '-----',
-            pass: '-----'
+            user: '*****',
+            pass:  '*****'
+
         }
     };
     var transporter = nodemailer.createTransport(smtpConfig);
@@ -136,131 +160,9 @@ function send_mail(email, html) {
 
 
 
-
-
-//https://www.airbnb.com/search/search_results?%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0--%D0%B3%D0%BE%D1%80%D0%BE%D0%B4-%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0?page=1&allow_override%5B%5D=&ss_id=cr55kq37&price_max=653&ne_lat=55.76371669547501&ne_lng=37.649681311595714&sw_lat=55.75426077896213&sw_lng=37.62255881403712&zoom=15&search_by_map=true&s_tag=fG-hoEkr
-app.get("/fetch", function (req, res) {
-
-    var httpParams = {
-        host: "airbnb.com",
-        headers: { 'user-agent': 'Mozilla/5.0' },
-        path: "/search/search_results?%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0--%D0%B3%D0%BE%D1%80%D0%BE%D0%B4-%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0?page=1&allow_override%5B%5D=&ss_id=cr55kq37&price_max=653&ne_lat=55.76371669547501&ne_lng=37.649681311595714&sw_lat=55.75426077896213&sw_lng=37.62255881403712&zoom=15&search_by_map=true&s_tag=fG-hoEkr"
-    }
-    https.get(httpParams, function (result) {
-        console.log(result)
-        res.send({ message: "ok" });
-    }).on('error', function (e) {
-        res.send({ message: e.message });
-    });
-    
-});
-
-
-
-function fetch_bnb(url, resourse, final_json) {
-    console.log("fetching " + url);
-    var url_instance = new URIlib.URI(url);
-    var transport = (url_instance.getScheme() || "").toLowerCase() === "https" ? https : http;
-
-    var httpParams = {
-        host: url_instance.getAuthority(),
-        headers: { 'user-agent': 'Mozilla/5.0' },
-        path: (url_instance.getPath() || "") + "?" + (url_instance.getQuery() || "")
-    }
-
-
-    var transpot_info = transport.get(httpParams, function (result) {
-        console.log("ok");
-        processResponse(result, resourse, final_json, url_instance);
-    }).on('error', function (e) {
-        console.log("not ok");
-        res.send({ message: e.message });
-    });
-   // return final_json; 
-
-}
-
-
-var processResponse = function (result, resourse, final_json, url_instance) {
-    //console.log("processing");
-    var data = "";
-    result.on("data", function (chunk) {
-        data += chunk;
-    });
-    result.on("end", function (chunk) {
-
-        var room_link = "https://www.airbnb.com/rooms/";
-
-        var result_json = final_json.result_json;
-        data = JSON.parse(data).results_json;
-        var results = data.search_results;
-        for (i = 0; i < results.length; i++) {
-            var listing = results[i].listing;
-            var price_object = results[i].pricing_quote;
-            json_object = {
-                air_id: listing.id,
-                url: room_link + listing.id,
-                title: listing.name,
-                price: price_object.rate.amount,
-                price_currency: price_object.rate.currency,
-                price_type: price_object.rate_type,
-                img: listing.picture_url
-            };
-            result_json.push(json_object);
-        }
-        final_json.results = result_json;
-        final_json.found_on_page = data.metadata.pagination.result_count;
-        final_json.max_on_page = 18
-        final_json.total = data.metadata.listings_count;
-        page = url_instance.parseQuery().getParam("page");
-        //console.log(page);
-        if (page === null)
-            page = 1;
-        //console.log("processing page "+page);    
-
-
-        if (final_json.total === final_json.found_on_page * 1 + final_json.max_on_page * (page * 1 - 1)) {
-            //finished
-            onComplete(finalJSON);
-            resourse.setHeader('Content-Type', 'application/json');
-            resourse.send(final_json);
-        } else {
-            //load more
-            var new_url = url_instance.toString().replace(/&page=\d*/, "&page=" + (page * 1 + 1));
-            // console.log("load more "+new_url);
-            //resourse.setHeader('Content-Type', 'application/json');
-            //resourse.send(final_json);
-            fetch_bnb(new_url, resourse, final_json);
-
-        }
-
-
-
-
-    });
-}
-
-
-/*
-app.post("/fetch", function (req, res, next) {
-
-
-    if (req.body) {
-        var requested_url = req.body.url.trim();
-        if (requested_url === undefined) {
-            res.send({ message: "url cannot be undefined" });
-        }
-        new_url = render_url(requested_url);
-        console.log(new_url);
-        fetch_bnb(new_url, res, { result_json: [] });
-
-    }
-});
-*/
-
-
-function doCrawl(url) {
-   // crawlPage(url, resp => filterResponses(resp, filtered => putToDB(filtered)))
+//--------------------------------
+function doCrawlTest(url) {
+    // crawlPage(url, resp => filterResponses(resp, filtered => putToDB(filtered)))
     var result = [];
     for (var i = 1; i < 27; ++i) {
         result.push({
@@ -279,83 +181,78 @@ function doCrawl(url) {
         });
     }
     return result;
-    /*
-        
-          var actualUrl = render_url(actualUrl);
-          var url_instance = new URIlib.URI(url);
-          var transport = (url_instance.getScheme() || "").toLowerCase() === "https" ? https : http;
-      
-          
-          var httpParams = {
-              host: url_instance.getAuthority(),
-              headers: { 'user-agent': 'Mozilla/5.0' },
-              path: (url_instance.getPath() || "") + "?" + (url_instance.getQuery() || "")
-          }
-      
-          var transpot_info = transport.get(httpParams, function(result) {
-              processResponse(result, resourse, final_json, url_instance);
-          }).on('error', function(e) {
-              res.send({ message: e.message });
-          });
-          return final_json;
-          */
 }
 
 
 
 
-function send_mail_from_DB(res, del) {
-    db.collection('airbnb.tomail').find().toArray(function (err, results) {
-        results.forEach(function (elem) {
+function iterateActiveRequests(iterator) {
+    db.collection('airbnb.requests').find({ active: { $eq: "1" } }).toArray((err, result) => result.forEach(iterator))
+}
 
+function crawlMultiplePage(baseUrl, onComplete) {
+    var url_instance = new URIlib.URI(baseUrl);
+    var transport = (url_instance.getScheme() || "").toLowerCase() === "https" ? https : http;
 
-            res.render('mail.ejs', { json_data: elem.responses }, function (err, html) {
+    var queryParams = url_instance.parseQuery();
+    var httpParams = {
+        host: url_instance.getAuthority(),
+        headers: { 'user-agent': 'Mozilla/5.0' }
+    }
 
-                if (err == null) {
-                    if (send_mail(elem.email, html))
-                        if (del)
-                            db.collection('airbnb.tomail').deleteOne({ _id: elem._id }, (err, result) => { });;
+    var hotelsArray = [];
+    var crawlOnePage = function (pageNum) {
+        queryParams.params.page = ["" + pageNum];
+        httpParams.path = (url_instance.getPath() || "") + "?" + queryParams.toString();
+        var transpot_info = transport.get(httpParams, function (result) {
+            var data = "";
+            result.on("data", function (chunk) {
+                data += chunk;
+            }).on("end", function (chunk) {
+                var json = JSON.parse(data).results_json;
+                hotelsArray = hotelsArray.concat(json.search_results);
+                if (json.metadata.listings_count <= hotelsArray.length) {
+                    onComplete(hotelsArray);
                 } else {
-                    console.log(err);
+                    crawlOnePage(pageNum + 1);
                 }
-            });
+            })
 
-
+        }).on('error', function (e) {
+            console.log("not ok");
         });
-
-        res.send({ message: "ok" });
-    })
+    }
+    crawlOnePage(1);
 }
 
+app.get("/crawl", function (req, res) {
+    var handleCrawledData = function (crawled, request) {
+        console.log("Before filter: " + crawled.length);
+        if (request.responses) {
+            var existed = request.responses.map(resp => resp.listing.id);
+            crawled = crawled.filter(function (resp) {
+                return existed.indexOf(resp.listing.id) < 0
+            });
+            console.log("After filter: " + crawled.length);
+        }
+        else 
+          console.log("No filter");
+        if (crawled.length > 0) {
+            db.collection('airbnb.requests').update({ _id: ObjectID(request._id) }, { $push: { 'responses': { $each: crawled } } }, logError);
 
-app.get("/crawl", function (req, res, next) {
+            mail = {url: request.url, email: request.email, responses :crawled};
 
-    db.collection('airbnb.requests').find({ active: { $eq: "1" } }).toArray((err, result) => {
+            db.collection('airbnb.tomail').save(mail, logError);
+        }
 
-        var founded = result.map(elem => {
-            new_url = render_url(elem.url);
-            //var crawled = fetch_bnb(new_url, res, { result_json: [] });
-            var crawled = doCrawl();
-            if (elem.responses) {
-                var existed = elem.responses.map(resp => resp.listing.id);
-                crawled = crawled.filter(function (resp) {
-                    return existed.indexOf(resp.listing.id) < 0
-                });
-            }
-            if (crawled.length > 0) {
-                db.collection('airbnb.requests').update({ _id: ObjectID(elem._id) }, { $push: { 'responses': { $each: crawled } } }, (err, result) => { });
+        
+    }
 
-                mail = {}
-                mail.url = elem.url;
-                mail.email = elem.email;
-                mail.responses = crawled;
-
-                db.collection('airbnb.tomail').save(mail, (err, result) => { });
-
-            }
-            return crawled;
-        });
-        res.send(founded);
+    iterateActiveRequests(function (request) {
+        crawlMultiplePage(renderUrl(request.url), function (newResponses) {
+            handleCrawledData(newResponses, request);
+        })
     });
-});
 
+            res.redirect('/')
+});

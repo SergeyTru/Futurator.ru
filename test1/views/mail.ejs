@@ -754,7 +754,7 @@
 <![endif]-->
 <!--[if !mso]><!-->
           <% 
-    var results=json_data.results_json.search_results;
+    var results=json_data;
     total_results=results.length;
     max_results=8;
  
@@ -858,7 +858,7 @@
 
           <% 
  
-    for(var i=0; i<max_results; i++) {
+    for(var i=0; i<Math.min(results.length, max_results); i++) {
       %>
 
                     <!-- ROW START -->
