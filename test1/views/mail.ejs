@@ -754,7 +754,7 @@
 <![endif]-->
 <!--[if !mso]><!-->
           <% 
-    var results=json_data;
+    var results=data.responses;
     total_results=results.length;
     max_results=8;
  
@@ -1051,9 +1051,9 @@
                             <div style="Margin-left: 20px;Margin-right: 20px;">
                               <div class="btn btn--flat btn--medium" style="Margin-bottom: 20px;text-align: center;">
                                 <!--[if !mso]--><a style="border-radius: 4px;display: inline-block;font-size: 12px;font-weight: bold;line-height: 22px;padding: 10px 20px;text-align: center;text-decoration: none !important;transition: opacity 0.1s ease-in;color: #e31212 !important;background-color: #ffffff;font-family: sans-serif;"
-                                  href="http://airbnb.com" target="_blank">Click for Airbnb website</a>
+                                  href="<%=data.url%>" target="_blank">Click for Airbnb website</a>
                                 <!--[endif]-->
-                                <!--[if mso]><p style="line-height:0;margin:0;">&nbsp;</p><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="http://airbnb.com" style="width:176px" arcsize="10%" fillcolor="#FFFFFF" stroke="f"><v:textbox style="mso-fit-shape-to-text:t" inset="0px,9px,0px,9px"><center style="font-size:12px;line-height:22px;color:#E31212;font-family:sans-serif;font-weight:bold;mso-line-height-rule:exactly;mso-text-raise:4px">Click for Airbnb website</center></v:textbox></v:roundrect><![endif]-->
+                                <!--[if mso]><p style="line-height:0;margin:0;">&nbsp;</p><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="<%=data.url%>" style="width:176px" arcsize="10%" fillcolor="#FFFFFF" stroke="f"><v:textbox style="mso-fit-shape-to-text:t" inset="0px,9px,0px,9px"><center style="font-size:12px;line-height:22px;color:#E31212;font-family:sans-serif;font-weight:bold;mso-line-height-rule:exactly;mso-text-raise:4px">Click for Airbnb website</center></v:textbox></v:roundrect><![endif]-->
                               </div>
                             </div>
 

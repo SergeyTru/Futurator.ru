@@ -12,6 +12,7 @@ const later = require('later');
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.static('public'));
 
 const MongoClient = require('mongodb').MongoClient
 var ObjectID = require('mongodb').ObjectID;
@@ -35,11 +36,15 @@ MongoClient.connect(mongo_url, (err, database) => {
 
 app.get('/', (req, res) => {
     db.collection('airbnb.requests').find().toArray(function (err, results) {
-        res.render('index.ejs', { requests: results });
+        res.render('index.ejs', { requests: results, URIlib:URIlib });
     })
 
 })
 
+
+
+
+ 
 
 app.get('/showmail', (req, res) => {
     res.render('mail.ejs', { json_data: test.test_data.results_json.search_results })
@@ -83,17 +88,6 @@ app.get('/sendmail', (req, res) => {
 });
 
 
-function logError(err, result) {
-    if (err) {
-      console.log("");
-      console.log("Error: ");
-      console.log(err);
-      console.trace();
-      console.log("");
-    }
-}
-
-
 
 function renderUrl(url) {
     var url_instance = new URIlib.URI(url);
@@ -110,7 +104,7 @@ function sendMailDB(res, del) {
         results.forEach(function (elem) {
 
 
-            res.render('mail.ejs', { json_data: elem.responses }, function (err, html) {
+            res.render('mail.ejs', { data:elem }, function (err, html) {
 
                 if (err == null) {
                     if (sendMail(elem.email, html))
@@ -256,3 +250,30 @@ app.get("/crawl", function (req, res) {
 
             res.redirect('/')
 });
+
+
+ 
+/* 
+function b(a) {
+   return a;
+}
+app.locals.b=b;
+
+var url="https://www.airbnb.ru/s/Maldiv?guests=1&checkin=29.04.2017&checkout=03.05.2017&price_max=2845&ss_id=dmtd8n9l&ss_preload=true&adults=1&children=0&infants=0&source=bb&page=1&allow_override%5B%5D=&room_types%5B%5D=Entire%20home%2Fapt&s_tag=oWEiTBBc";
+
+var url_instance = new URIlib.URI(url);
+var queryParams = url_instance.parseQuery();
+console.log(queryParams);
+*/
+
+ 
+function logError(err, result) {
+    if (err) {
+      console.log("");
+      console.log("Error: ");
+      console.log(err);
+      console.trace();
+      console.log("");
+    }
+}
+

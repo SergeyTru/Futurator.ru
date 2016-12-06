@@ -15,84 +15,568 @@
 
 <body>
 
-<div class="main_div text-center" style="padding:0 30%;">
 
-<form class="" action="/save" method="POST">
-    <label for="url">
-        
-         
-        </label>
+    <div class="jumbotron">
+        <div class="container">
+            <h1>Super BnB</h1>
+            <p class="lead">Your ideal lodgings</p>
+            <p>
+
+                <a style="" class="button red_button" href="#subscribe_form">Track</a>
+                <a style="" class="button grey_button" href="./history">Check your history</a>
+
+            </p>
+        </div>
+    </div>
+
+    <div class="container">
+
+
+
+        <div class="row ">
+            <div class="col-lg-12">
+                <div id="what_is_here">
+                    <h1 class="text-center">What is this all about</h1>
+                    <p class="lead">
+                        We will check <a href="https://airbnb.com/" target="_blank">Airbnb</a> everyday and notify you if
+                        there are any new lodgings with your parameters;
+                    </p>
+                    <ul class="what_ul">
+                        <li><span class="content">Easy to subscribe</span></li>
+                        <li> <span class="content"> This is free forever</span></li>
+                        <li><span class="content"> No advertisment ever</span></li>
+                        <li><span class="content"> Easy to unsubscribe</span></li>
+                    </ul>
+                    <p class="lead">
+                        You can always contact us - <a href="mailto:contacts@futurator.ru">contacts@futurator.ru</a>
+                    </p>
+                    <p>
+                        P.S. We are not affiliated in any way with Airbnb. This is a sad truth;
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        <div class="row ">
+            <div class="col-lg-12">
+                <h1 class="text-center">Subscribtion form</h1>
+                <div class="text-center">
+                    <span class="helper" id="show_help">Not sure what to do? Click here for short FAQ</span>
+                </div>
+
+
+                <div id="what_to_do" class="hidden">
+                    <h1 class="text-center">What to do in 8 short steps</h1>
+                    <div class="what_block">
+                        <span class="what_number">1.</span>
+                        <span class="what_text">Visit <a href="#">airbnb website </a>   </span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="https://cdn.pbrd.co/images/4V7ceUFtO.png">
+                        </div>
+                    </div>
+                    <div class="what_block">
+                        <span class="what_number">2.</span>
+                        <span class="what_text">Enter your search parameters</span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="https://cdn.pbrd.co/images/4V7pfMTyu.png">
+                        </div>
+                    </div>
+                    <div class="what_block">
+                        <span class="what_number">3.</span>
+                        <span class="what_text">Enter primary filters like price and room type</span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="https://cdn.pbrd.co/images/4VcUun8xv.png">
+                        </div>
+                    </div>
+                    <div class="what_block">
+                        <span class="what_number">3.</span>
+                        <span class="what_text">Check new results</span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="https://cdn.pbrd.co/images/4Vh92DP8c.png">
+                        </div>
+                    </div>
+                    <div class="what_block">
+                        <span class="what_number">4.</span>
+                        <span class="what_text">Copy updated url</span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="https://cdn.pbrd.co/images/4VlhQM3u2.png">
+                        </div>
+                    </div>
+                    <div class="what_block">
+                        <span class="what_number">5.</span>
+                        <span class="what_text">Paste it in our <a href="#subscribe_form">form</a></span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="http://satyr.io/750x250">
+                        </div>
+                    </div>
+                    <div class="what_block">
+                        <span class="what_number">6.</span>
+                        <span class="what_text">Enter your email and click the subscribe button</span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="http://satyr.io/750x250">
+                        </div>
+                    </div>
+                    <div class="what_block">
+                        <span class="what_number">7.</span>
+                        <span class="what_text">Confirm your email</span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="http://satyr.io/750x250">
+                        </div>
+                    </div>
+                    <div class="what_block success_block">
+                        <span class="what_number">8.</span>
+                        <span class="what_text">Profit! We will check for new logings every 24 hours and send you a notification emal</span>
+                        <div class="what_img_block">
+                            <img class="what_img img-responsive img-thumbnail" src="http://satyr.io/750x250">
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <form class="" id="subscribe_form" action="/save" method="POST">
+                    <label for="url">Paste URL here</label>
+                    <textarea class="form-control" rows="8" name="url" id="url" placeholder="https://airbnb.com/..."></textarea>
+                    <label for="url">Enter our email here</label>
+                    <input type="email" name="email" id="email" class="form-control" placeholder="name@server.com">
+                    <input type="hidden" name="active" value="1">
+                    <button type="submit" class="btn button red_button">Subscribe me</button>
+                </form>
+
+            </div>
+        </div>
+
+
+        <div class="row ">
+            <div class="col-lg-12">
+                <h1 class="text-center">Your history</h1>
+
+                <ul class="requests">
+                    <% for(var i=0; i<requests.length; i++) {%>
+
+                        <li class="request">
+                           <!-- <span class="email"><%= requests[i].email %></span>
+                            <br> -->
+                            <a href="<%= requests[i].url %>" target="_blank" class="url">
+                                <%= requests[i].url %>
+
+                            </a>
+                            <br>
+
+                            <form action="/set_active" method="POST">
+                                <input type="hidden" name="request_id" value="<%= requests[i]._id %>">
+                                <input type="hidden" name="new_active_state" value="<%= 1-requests[i].active %>"> Active:
+                                <span class="active"><%= requests[i].active %>  <input type="submit" value="change"></span>
+                            </form>
+                            <div class="request_params">
+
+                                <%
+                            var url_instance = new URIlib.URI(requests[i].url);
+                            var queryParams = url_instance.parseQuery();                                 
+                                %>
+                                    <!--
+params:
+   { guests: [ '1' ],
+     checkin: [ '11%2F24%2F2016' ],
+     checkout: [ '12%2F14%2F2016' ],
+     ss_id: [ 'njxzaczf' ],
+     source: [ 'bb' ],
+     page: [ '1' ],
+     'allow_override%5B%5D': [ '' ],
+     'room_types%5B%5D': [ 'Private%20room' ],
+     price_max: [ '987' ],
+     s_tag: [ '0mzkR8fw' ] },
+  separator: '&' }
+  -->
+
+
+                                    <% 
+                                    var param=queryParams.getParam('checkin');
+                                    if(param!==null) { %>
+                                        <div class="request_param">
+                                            <span class="param_name">
+                                            Check in
+                                    </span>
+                                            <span class="param_value">
+                                            <%=param.replace(/%2F/g,".")%>
+                                    </span>
+                                        </div>
+                                    <% } %>
+                                    <% 
+                                    var param=queryParams.getParam('checkout');
+                                    if(param!==null) { %>
+                                        <div class="request_param">
+                                            <span class="param_name">
+                                            Check out
+                                    </span>
+                                            <span class="param_value">
+                                            <%=param.replace(/%2F/g,".")%>
+                                    </span>
+                                        </div>
+                                    <% } %>
+
+                                    <% 
+                                    var param=queryParams.getParam('price_min');
+                                    if(param!==null) { %>
+                                        <div class="request_param">
+                                            <span class="param_name">
+                                            Min price
+                                    </span>
+                                            <span class="param_value">
+                                            <%=param%>
+                                    </span>
+                                        </div>
+                                    <% } %>
+
+                                    <% 
+                                    var param=queryParams.getParam('price_max');
+                                    if(param!==null) { %>
+                                        <div class="request_param">
+                                            <span class="param_name">
+                                            Max price
+                                    </span>
+                                            <span class="param_value">
+                                            <%=param%>
+                                    </span>
+                                        </div>
+                                        <% } %>
+
+
+
+
+
+                            </div>
+
+
+
+
     
-    <textarea   class="form-control" rows="8" name="url" id="url" placeholder="https://airbnb.com/...">
 
-https://www.airbnb.ru/s/Maldiv?guests=1&checkin=29.04.2017&checkout=03.05.2017&price_max=2845&ss_id=dmtd8n9l&ss_preload=true&adults=1&children=0&infants=0&source=bb&page=1&allow_override%5B%5D=&room_types%5B%5D=Entire%20home%2Fapt&s_tag=oWEiTBBc
 
-    </textarea>
-    <input type="email" name="email" id="email"  class="form-control" placeholder="name@server.com" value="amantels@gmail.com">
- <input type="hidden" name="active"    value="1"> 
-  <button type="submit" class="btn btn-default btn-lg">Subscribe me</button>
-</form>
+ <div class="responses">
+                               <table> 
+                                   <tbody>                                   
+                                       
 
-  <a href="/crawl" class="btn btn-default btn-lg">crawl</a>
-  <a href="/sendmail" class="btn btn-default btn-lg">send</a>
+                                  <% 
+                                  var room_link="https://www.airbnb.com/rooms/";
+                                  var maximum=Math.min(requests[i].responses.length, 12);
+                                  for(var j=0; j<maximum; j++) {
+                                      var listing=requests[i].responses[j].listing;
+                                      var price_object=requests[i].responses[j].pricing_quote;    
 
-<ul>
-      <% for(var i=0; i<requests.length; i++) {%>
- 
-    <li class="request">
-        <span class="email"><%= requests[i].email %></span>
-        <br>
-        <a href="<%= requests[i].url %>" target="_blank" class="url"><%= requests[i].url %></a>
-        <br>
+                                      
+                                      %>
+                                      <tr>
+                                          <td>
+                                                <div class="response">
+                                                    <div class="image_block">
+                                                        <img style="border: 0;" class="img-responsive img-thumbnail" alt="<%=listing.name%>"  src="<%=listing.picture_url%>">
+                                                    </div>                                    
+                                                    <div class="text_block">
+                                                        
+                                                        <div class="response_title">
+                                                            <%=listing.name%>
+                                                        </div>
+                                                        <div class="response_price">
+                                                            <%=price_object.rate.currency%> <%=price_object.rate.amount%> (<%=price_object.rate_type%>)
+                                                        </div>
+                                                        <div class="response_button">
+                                                            <a href="<%=room_link+listing.id%>" target="_blank" class="button red_button">Book at Airbnb</a>
+                                                        </div>
+                                                    </div>
+                                        
+
+                                                </div> 
+                                            </td>
+                                           
+                                            <%  if(j+1<=maximum) {
+                                                j=j+1;
+                                      var listing=requests[i].responses[j].listing;
+                                      var price_object=requests[i].responses[j].pricing_quote;    
+                                                
+                                                 %>
+                                          <td>
+                                                <div class="response">
+                                                    <div class="image_block">
+                                                        <img style="border: 0;" class="img-responsive img-thumbnail" alt="<%=listing.name%>"  src="<%=listing.picture_url%>">
+                                                    </div>                                    
+                                                    <div class="text_block">
+                                                        
+                                                        <div class="response_title">
+                                                            <%=listing.name%>
+                                                        </div>
+                                                        <div class="response_price">
+                                                            <%=price_object.rate.currency%> <%=price_object.rate.amount%> (<%=price_object.rate_type%>)
+                                                        </div>
+                                                        <div class="response_button">
+                                                            <a href="<%=room_link+listing.id%>" target="_blank" class="button red_button">Book at Airbnb</a>
+                                                        </div>
+                                                    </div>
+                                        
+
+                                                </div> 
+                                            </td>
+
+                                            <%  } %>
+
+                                            <%  if(j+1<=maximum) {
+                                                
+                                                j=j+1;
+                                      var listing=requests[i].responses[j].listing;
+                                      var price_object=requests[i].responses[j].pricing_quote;    
+                                                
+                                                 %>
+                                          <td>
+                                                <div class="response">
+                                                    <div class="image_block">
+                                                        <img style="border: 0;" class="img-responsive img-thumbnail" alt="<%=listing.name%>"  src="<%=listing.picture_url%>">
+                                                    </div>                                    
+                                                    <div class="text_block">
+                                                        
+                                                        <div class="response_title">
+                                                            <%=listing.name%>
+                                                        </div>
+                                                        <div class="response_price">
+                                                            <%=price_object.rate.currency%> <%=price_object.rate.amount%> (<%=price_object.rate_type%>)
+                                                        </div>
+                                                        <div class="response_button">
+                                                            <a href="<%=room_link+listing.id%>" target="_blank" class="button red_button">Book at Airbnb</a>
+                                                        </div>
+                                                    </div>
+                                        
+
+                                                </div> 
+                                            </td>
+
+                                            <%  } %>
+
+                                            </tr>   
+                                  <%  } %>
+
+
+
+                                    </tbody>
+                                   </table>
+                            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        </li>
+                        <% } %>
+
+                </ul>
+            </div>
+        </div>
+
+
+
+
+
+        <footer class="footer">
+            <p>&copy; 2016 Company, Inc.</p>
+        </footer>
+
+    </div>
+    <!-- /container -->
+
+
+    <style>
+
+
+
+.response {
+    font-size: 16px;
+    padding: 10px;
+    border: #eee 2px solid;
+    border-collapse: collapse;
+    margin: 4px;
+}
+
+.responses td{
+    vertical-align: top;
+}
+.response_price {
+    color:#e31212;
+ font-weight:bold;
+
+}
+
+.response_title {
+    color:#281557;
+        font-size:22px;
+
+}
+
+.text_block {
+           
+            text-align:center;
+        }
+        .text_block div {
+            margin: 10px 0;
+        }
+
+        .image_block {
+             text-align:center;
+        }
+        .request {
+            word-break: break-all;
+                clear: both;
+                    padding: 70px 0; 
+        }
+        .requests {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    margin: 60px 0;
+
+        }
+        .helper {
+            display: inline-block;
+            border-bottom: 1px dashed lightblue;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
         
-        <form action="/set_active" method="POST">
-            <input type="hidden" name="request_id" value="<%= requests[i]._id %>">
-            <input type="hidden" name="new_active_state" value="<%= 1-requests[i].active %>">
-           Active: <span class="active"><%= requests[i].active %>  <input type="submit" value="change">
-        </form>
-        </span>        
-    </li>    
-  <% } %>
-
-    </ul>
-
-
-
- 
-
-</div>
-
- 
-<style>
-
-.small_img {
-    max-width: 200px;
-    max-height: 200px;
-}
-
-.room_item {
-    margin:10px;
-    float:left;
-    text-align:left;
-    border:1px #abc dashed;
-}
-.request {
-    max-width:600px;
-        word-break: break-all;
-        text-align: left;
-}
-</style>
+        .helper:hover {
+            border-bottom: 1px dashed #FFF;
+        }
+        
+        #subscribe_form label {
+            margin: 10px 0;
+        }
+        
+        #subscribe_form input {
+            margin-bottom: 10px;
+        }
+        
+        ul.what_ul {
+            list-style-type: katakana;
+            color: red;
+        }
+        
+        ul.what_ul .content {
+            color: #000;
+        }
+        
+        .what_img_block {
+            text-align: center;
+        }
+        
+        .what_number {
+            font-size: 41px;
+            color: #FF0000;
+        }
+        
+        .what_text {
+            font-size: 28px;
+        }
+        
+        .what_img {
+            display: inline-block;
+        }
+        
+        .jumbotron {
+            color: #FFF;
+            background-color: #4b5462;
+            background-position: 0px 0px;
+            background-image: url(https://i1.createsend1.com/ei/d/83/111/C0D/002947/csfinal/header-img361.jpg);
+            background-repeat: repeat;
+            text-align: center;
+        }
+        
+        .jumbotron .lead {
+            font-size: 32px;
+        }
+        
+        .jumbotron h1 {
+            font-size: 64px;
+        }
+        
+        .button {
+            border-radius: 4px;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 24px;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none !important;
+            transition: opacity 0.1s ease-in;
+            color: #fff;
+        }
+        
+        .button:hover {
+            color: #fff;
+        }
+        
+        .button:focus {
+            color: #fff;
+        }
+        
+        .red_button {
+            background-color: #e31212;
+        }
+        
+        .red_button:hover {
+            background-color: #ff0000;
+        }
+        
+        .grey_button {
+            background-color: #827f7f;
+        }
+        
+        .grey_button:hover {
+            background-color: #a7a5a5;
+        }
+        
+        .footer {
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            color: #666;
+            margin: 20px 0;
+            font-size: small;
+            text-align: center;
+        }
+    </style>
 
 
     <script type='text/javascript' src="//code.jquery.com/jquery-latest.js"></script>
 
     <script type='text/javascript' src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-     <script type="text/javascript">
+    <script type='text/javascript' src="./js/URI.js"></script>
+    <script type="text/javascript">
     
     
         $(function() {
  
-
+            $(".show_help").click(function(e){
+                $("#what_to_do").toggleClass("hidden");
+            });
 
         });  
 
