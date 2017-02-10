@@ -87,8 +87,8 @@ function send_mail() {
     port: 465,
     secure: true, // use SSL
     auth: {
-        user: '----',
-        pass: '----'
+        user: 'mydiskmydisk',
+        pass: 'mvbb)Wp'
     }
 };
   var transporter = nodemailer.createTransport(smtpConfig);

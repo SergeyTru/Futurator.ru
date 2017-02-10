@@ -10,6 +10,14 @@ function UriTemplate(protocol, authority, path, params) {
   this.params = params
 }
 
+UriTemplate.equals = function(a, b) {
+  if (a === b)
+    return true;
+  if (a == undefined)
+    return false;
+  return a.protocol == b.protocol && a.authority == b.authority && a.path == b.path && a.params == b.params;
+}
+
 UriTemplate.prototype.toString = function() {
   function textOf(x) {
     if (x instanceof Function)
@@ -93,6 +101,8 @@ var templateForUris = function(url1, url2) {
   function textEqualsNoCase(text1, text2) {
     if (text1 === undefined)
       return text2 === undefined
+    else if (text1 === null)
+      return text2 === null
     else
       return text2 != undefined && text1.toUpperCase() === text2.toUpperCase();
   }
@@ -132,7 +142,7 @@ var templateForUris = function(url1, url2) {
 
   function templateForTextPart(part1, part2) {
     var isNumber = ch => ch >= '0' && ch <= '9';
-    var isDivider = ch => ch === '-' || ch === '_' || ch === '.' || ch === '+';
+    var isDivider = ch => ch === '-' || ch === '_' || ch === '.' || ch === '+' || ch === ':';
     var isText = ch => ch.toLowerCase() != ch.toUpperCase();
     var classFor = ch => [isDivider, isNumber, isText].find(cl => cl(ch));
 
@@ -186,7 +196,12 @@ var templateForUris = function(url1, url2) {
 
   var auth1 = url1.getAuthority();
   var auth2 = url2.getAuthority();
-  if (auth1.indexOf('@') >= 0 || auth2.indexOf('@') >= 0)
+  //OK if both is null or both without authority
+  if (auth1 === null && auth2 === null)
+    ;//it's ok
+  else if (auth1 !== null && auth1.indexOf('@') < 0 && auth2 !== null && auth2.indexOf('@') < 0)
+    ;//it's even better
+  else
     return;
 
   if (textEqualsNoCase(auth1, auth2))
@@ -267,6 +282,8 @@ var templateForUris = function(url1, url2) {
     var diffLen = parts1.length != parts2.length;
     for (var i = 0; i < minLen; ++i) {
       var subRes = templateForTextPart(parts1[i], parts2[i]);
+      if (subRes === undefined)
+        return;
       if (diffLen)
         if (subRes.length === 1 && subRes[0] === '{T}')
           break;

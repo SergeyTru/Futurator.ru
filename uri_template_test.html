@@ -163,6 +163,56 @@
     }    
 
     startSection("Path");
+	
+	printResult(
+"http://localhost/fut/web/register.html",
+"http://localhost/fut/web/login.html",
+ "/fut/web/{T}.html"
+ );		
+		
+	
+	
+	printResult(
+"http://localhost/fut/web/login.html",
+ "http://localhost/fut/web/register.html",
+ "http://localhost/fut/web/{T}.html"
+ );		
+	
+	printResult(
+"file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/product.html",
+ "file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/index.htm",
+ "file:/:E{/}{T}.html"
+ );	
+ 	printResult(
+"file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/product.html",
+ "file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/index.htm",
+ "file:/E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/{T}.html"
+ );	
+ 	printResult(
+"file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/product.html",
+ "file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/index.htm",
+ "file:/E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/{T}/{T}"
+ );	
+ 
+  	printResult(
+"file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/product.html",
+ "file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/index.htm",
+ "file:/E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/{T}/{T}"
+ );	
+   	printResult(
+"file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/product.html",
+ "file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/index.htm",
+ "file:/:E/BASE_FUTURATOR/projects/master-ru.Futurator/web{/}"
+ );	
+ 
+    	printResult(
+"file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/product.html",
+ "file:///E:/FUTURATOR_BASE/projects/Futurator.ru-master/web/index.htm",
+ "file:/E:/{T}/{T}.html"
+ );	
+ 
+ 
+ 
     printResult("http://bash.im/item-1.html", "http://bash.im/item-2.html", "http://bash.im/item-{N}.html");
     printResult("http://bash.im/item1", "http://bash.im/item2", "http://bash.im/item{N}");
     printResult("http://bash.im/tv.html", "http://bash.im/music.html", "http://bash.im/{T}.html");
