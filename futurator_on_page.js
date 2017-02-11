@@ -54,10 +54,10 @@ function getDomPath(el) {
     while (el.parentNode !== null) {
         var nodeName = el.nodeName.toLowerCase();
         stack.unshift(nodeName);
-		el = el.parentNode;
-		if (el.nodeType === 11) { // for shadow dom
-			el = el.host;
-		}        
+        el = el.parentNode;
+        if (el.nodeType === 11) { // for shadow dom
+            el = el.host;
+        }        
     }
     stack.splice(0, 1); // removes the html element
     return stack.join(' > ');
@@ -70,13 +70,15 @@ Object.prototype.addToKey = function (key, value) {
     else
         this[key] = [value];
 };
-function log(obj, debug) {
+
+function log(obj) {
+    debug=true;
     if (debug) {
         console.log(obj);
     }
 }
 
-function getPathAndUrlsArrayfromAnchors(debug) {
+function getPathAndUrlsArrayfromAnchors() {
     //vars
     //return object
     var resultObj = {};
@@ -103,11 +105,7 @@ function getPathAndUrlsArrayfromAnchors(debug) {
                 shortHref = href;
 
             if (shortHref !== "") {
-                var anchorObj = {};
-                anchorObj.href = shortHref;
-                anchorObj.html = el.innerHTML; // for tests
-                anchorObj.path = getDomPath(el);
-                anchorsArray.push(anchorObj);
+                anchorsArray.push({href: shortHref, html: el.innerHTML, path: getDomPath(el)});
             }
         }
         
@@ -129,7 +127,7 @@ function getPathAndUrlsArrayfromAnchors(debug) {
         anchorsByPathArrayObj.addToKey(anchorObj.path, anchorObj);
     });
     //Now in anchorsByPathArrayObj we have all distinct paths with anchors
-    log(anchorsByPathArrayObj, debug);
+    log(anchorsByPathArrayObj);
     //Look inside each distinct path in anchorsByPathArrayObj and
     //find findUriClusters (>0) there. Store them
     Object.keys(anchorsByPathArrayObj).forEach(function (path) { 
@@ -142,7 +140,7 @@ function getPathAndUrlsArrayfromAnchors(debug) {
         }
     });
     //Now we have all distinct paths with 1 or more UriClusters.
-    log(uriClusterByPathObj, debug);
+    log(uriClusterByPathObj);
     Object.keys(anchorsByPathArrayObj).forEach(function (path) {
         anchorsByPathArrayObj[path].forEach(function (anchorObj) {
             anchorObj.linkClusters = anchorObj.linkClusters.filter(cluster =>                 
@@ -156,7 +154,7 @@ function getPathAndUrlsArrayfromAnchors(debug) {
     //and with right UriClusters.
     //In short we had now there are UriClasters in anchors
     //that are equal instide path
-    log(anchorsByPathArrayObj, debug);
+    log(anchorsByPathArrayObj);
 
     //Add to result objects with distinct path and cluster 
     Object.keys(anchorsByPathArrayObj).forEach(function (path) {
@@ -172,8 +170,7 @@ function getPathAndUrlsArrayfromAnchors(debug) {
 }
 
 
-var debug=true;
 
-var pathAndUrlsArrayfromAnchors = getPathAndUrlsArrayfromAnchors(debug);
-log("result", debug);
-log(pathAndUrlsArrayfromAnchors, debug);
+var pathAndUrlsArrayfromAnchors = getPathAndUrlsArrayfromAnchors();
+log("result");
+log(pathAndUrlsArrayfromAnchors);
