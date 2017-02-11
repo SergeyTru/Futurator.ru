@@ -1,228 +1,179 @@
-/*DomPath from stackoverflow*/
+/* DomPath from stackoverflow http://stackoverflow.com/a/16742828 */
 function getDomPath(el) {
-  if (!el) {
-    return;
-  }
-  var stack = [];
-  var isShadow = false;
-  while (el.parentNode != null) {
-    // console.log(el.nodeName);
-    var sibCount = 0;
-    var sibIndex = 0;
-    // get sibling indexes
-    for ( var i = 0; i < el.parentNode.childNodes.length; i++ ) {
-      var sib = el.parentNode.childNodes[i];
-      if ( sib.nodeName == el.nodeName ) {
-        if ( sib === el ) {
-          sibIndex = sibCount;
-        }
-        sibCount++;
-      }
-    }
-    // if ( el.hasAttribute('id') && el.id != '' ) { no id shortcuts, ids are not unique in shadowDom
-    //   stack.unshift(el.nodeName.toLowerCase() + '#' + el.id);
-    // } else
-    var nodeName = el.nodeName.toLowerCase();
-    if (isShadow) {
-      nodeName += "::shadow";
-      isShadow = false;
-    }
-	/*	
-    if ( sibCount > 1 ) {
-      stack.unshift(nodeName + ':nth-of-type(' + (sibIndex + 1) + ')');
-    } else {
-      stack.unshift(nodeName);
-    }
-	*/
-	
-	stack.unshift(nodeName);
-	
-    el = el.parentNode;
-    if (el.nodeType === 11) { // for shadow dom, we
-      isShadow = true;
-      el = el.host;
-    }
-  }
-  stack.splice(0,1); // removes the html element
-  return stack.join(' > ');
+	if (!el) {
+		return;
+	}
+	var stack = [];
+	var isShadow = false;
+	while (el.parentNode != null) {
+    	var nodeName = el.nodeName.toLowerCase();
+
+		stack.unshift(nodeName);
+
+		el = el.parentNode;
+		if (el.nodeType === 11) { // for shadow dom, we
+			isShadow = true;
+			el = el.host;
+		}
+	}
+	stack.splice(0, 1); // removes the html element
+	return stack.join(' > ');
 }
 
+/*********FUNCTIONS********/
 
+function getUrlfromPath(anchors_by_path_Array) {
+	if(!anchors_by_path_Array)
+		return [];
 
-
-
-
-/**********CODE********/
-
-
-
-
-
-var urls=document.querySelectorAll("a");
-var urlArray=[];
-var urlClusterArrayObj={};
-
-
-
-//urls.each(function( index ) { 
-urls.forEach(function( el,index ) { 
-
-
-	var href=el.href;
-	var idx = href.indexOf('#');
-	if (idx >= 0)
-	  href=href.slice(0, idx);
-	else
-	  href=href;		
-	
-	
-	if(href!==undefined && href!==""){
-  
-	  
-	  var urlObj={};
-	  urlObj.href=href;
-	  urlObj.html=el.innerHTML; // for tests
-	  urlObj.path=getDomPath(el);
-
-		
-	  
-	  
-	  
-	  urlArray.push(urlObj);
-	}
-	else {
-		console.log("bad href "+href);
-	}
-});
-
-
-
-
-urlArray.forEach(function( el,index ) { 
-	  el.linkClusters=[];
-	  linkClusters.forEach(function( cluster,i ) { 
-		var text=cluster;
-		expr = '^' + text.toRegexp() + "$";
-		if(el.href.match(expr)) {
-			//console.log("href number "+index+"; cluster number "+i+"; result:");
-			//console.log(href.match(expr));
-			el.linkClusters.push(cluster);
-		}
-		
-		  
-	  });
-});
-	  
- 
-
-
-urlArray.forEach(function( urlObj,index ) { 
-	
-	if(!(urlObj.path in urlClusterArrayObj))
-			urlClusterArrayObj[urlObj.path]=[];
-
-	urlClusterArrayObj[urlObj.path].push(urlObj);
-});
-
-
- 
-function getUrlfromPath(urlClusterArray) {
-	var links_array=[];
-	urlClusterArray.forEach(function( urlObj,index ) { 
-		links_array.push(urlObj.href);
+	var links_array = [];		
+	anchors_by_path_Array.forEach(function (anchorObj, index) {
+		links_array.push(anchorObj.href);
 	});
-	//console.log(links_array);
 	return links_array;
 }
 
-/*
-var pathClusters=[];
 
 
- 
-urlClusterArrayObj.forEach(function( urlClusterArray,index ) { 
-	
-	var clusters=findUriClusters(getUrlfromPath(urlClusterArray));
-	if(clusters.length>0) {
-		console.log(index+" has "+clusters.length+" clusters");
-		pathClusters.push(clusters);
-	} else {
-		console.log(index+" zero clusters");
-	}
-});
+function getRightPath(pathClusters) {	
+	if(!pathClusters) 
+		return [];
 
-
-console.log(pathClusters);
-
-*/
-var pathClustersObj={};
-
-Object.keys(urlClusterArrayObj).map(function( key,index ) {
-	var urlClusterArray = urlClusterArrayObj[key];
-	
-	var clusters=findUriClusters(getUrlfromPath(urlClusterArray));
-	if(clusters.length>0) {
-
-		pathClustersObj[key]=clusters;			
-		//console.log(index+" has "+clusters.length+" clusters");
-	} else {
-		//console.log(index+" zero clusters");
-	}
-});
-
- 
-//console.log(pathClustersObj);
-
-
-
-
-
-function getRightPath(pathClusters) {
-	var paths=[];
-	$.each(pathClusters, function( index,pathCluster ) {
+	var paths = [];		
+	pathClusters.forEach(function (pathCluster) {		
 		paths.push(pathCluster.path);
-	});	
+	});
 	return paths;
 }
 
 
-Object.keys(urlClusterArrayObj).map(function( path,index ) {
-	var urlClusterArray = urlClusterArrayObj[path];
 
-	urlClusterArray.forEach(function( urlObj,index ) { 
-			
-			urlObj.linkClusters=urlObj.linkClusters.filter(cluster => getRightPath(pathClustersObj[path]).indexOf(cluster.path)>-1)
-	});	
+Object.prototype.addToKey = function (key, value) {
+	if (key in this)
+		this[key].push(value);
+	else
+		this[key] = [value];
+}
+
+function log(obj,debug) {
+	if(debug)
+	{
+		console.log(obj);
+	}
+}
+
+
+/**********CODE********/
+function getPathnUrlsArray_fromAnchors(linkClusters,debug) {
+	//vars
+	//return object
+	var resultObj={};
+	//array of all anchors with "good" hrefs, html and DOM paths
+	var anchorsArray = [];
+	//object with key = common DOM path, value = array of anchors in this DOM path
+	var anchors_by_path_ArrayObj = {};	
+	//object with key= distinct DOM path, value = distinct URItemplates 
+	var uriCluster_by_pathObj = {};
 	
 
-});
 
+
+	//Collect all anchors in DOM
+	var anchors = document.querySelectorAll("a");
+
+	//Populate anchorsArray with elements
+	anchors.forEach(function (el, index) {
+		var href = el.href;
+		var idx = href.indexOf('#');
+		if (idx >= 0)
+			short_href = href.slice(0, idx);
+		else
+			short_href = href;
+
+		if (short_href !== undefined && short_href !== "") {
+
+			var anchorObj = {};
+			anchorObj.href = short_href;
+			anchorObj.html = el.innerHTML; // for tests
+			anchorObj.path = getDomPath(el);
+
+			anchorsArray.push(anchorObj);
+		}
+		else {
+			log("bad href " + short_href,debug)
+		}
+	});
+
+	//add to anchorsArray elements linkClusters, based on element.href vs 
+	//each cluster regex
+	anchorsArray.forEach(function (el) {
+		el.linkClusters = [];
+		linkClusters.forEach(function (cluster, i) {
+			expr = '^' + cluster.toRegexp() + "$";
+			if (el.href.match(expr)) {
+				el.linkClusters.push(cluster);
+			}
+		});
+	});
+
+	//populating object with key = common DOM path, 
+	//value = array of anchors in this DOM path
+	anchorsArray.forEach(function (anchorObj) {
+		anchors_by_path_ArrayObj.addToKey(anchorObj.path,anchorObj)
+	});
+
+	//Now in anchors_by_path_ArrayObj we have all distinct paths with anchors
+	log(anchors_by_path_ArrayObj,debug)
  
+	//Look inside each distinct path in anchors_by_path_ArrayObj and
+	//find findUriClusters (>0) there. Store them
+	Object.keys(anchors_by_path_ArrayObj).forEach(function (path) {
+		var clusters = findUriClusters(getUrlfromPath(
+			anchors_by_path_ArrayObj[path])
+		);
 
+		if (clusters.length > 0) {
+			uriCluster_by_pathObj[path] = clusters;
+		} 
+	});
+
+	//Now we have all distinct paths with 1 or more UriClusters.
+	log(uriCluster_by_pathObj,debug)
  
+	Object.keys(anchors_by_path_ArrayObj).forEach(function (path) {
+		anchors_by_path_ArrayObj[path].forEach(function (anchorObj) {
+			anchorObj.linkClusters = anchorObj.linkClusters.filter(cluster =>
+				getRightPath(uriCluster_by_pathObj[path]).indexOf(cluster.path) > -1
+			)
+		});
 
-var comboArrayObj={};
-	
-Object.keys(urlClusterArrayObj).map(function( path,index ) {
-	var urlClusterArray = urlClusterArrayObj[path];
-	urlClusterArray.forEach(function( urlObj,index ) {
-		urlObj.linkClusters.forEach(function( cluster,index ) {
-			var totalString="path: "+path+" | cluster: "+cluster.path;
-			if(!(totalString in comboArrayObj))
-					comboArrayObj[totalString]=[];
-
-			comboArrayObj[totalString].push(urlObj);			
-			
-		});	 		
-		
-	});	
-	
-
-});
-
-console.log("comboArrayObj");
-console.log(comboArrayObj);
-
-
+	});
  
- 
+	//Now in anchors_by_path_ArrayObj we have all distinct paths with anchors
+	//and with right UriClusters.
+	//In short we had now there are UriClasters in anchors
+	//that are equal instide path
+	log(anchors_by_path_ArrayObj,debug)
+
+
+
+	//Add to result objects with distinct path and cluster 
+	Object.keys(anchors_by_path_ArrayObj).forEach(function (path) {
+		var urlClusterArray = anchors_by_path_ArrayObj[path];
+		urlClusterArray.forEach(function (anchorObj) {
+			anchorObj.linkClusters.forEach(function (cluster) {
+				var totalString = "path: " + path + " | cluster: " + cluster.path;
+				resultObj.addToKey(totalString, anchorObj);
+			});
+
+		});
+
+	});
+
+
+
+	return resultObj;
+}
+
+var PathnUrlsArray_fromAnchors=getPathnUrlsArray_fromAnchors(linkClusters,1); 
+log(PathnUrlsArray_fromAnchors,1);
