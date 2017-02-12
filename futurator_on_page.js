@@ -73,12 +73,19 @@ function log(obj) {
     }
 }
 
-function addClusters(clusters,values,path) {
+function splitByClusters(clusters,values,path) {
         var tmpArray=[];
         clusters.forEach((cluster) => {
             var expr = '^' + cluster.toRegexp() + "$";
             var nodes = values.filter(awi => awi.url.match(expr)).map(awi => awi.anchor);
-            tmpArray.push({ path: path, nodes: nodes, urlTemplate: cluster,uriClusterText:cluster.toString() });
+
+            tmpArray.push({ 
+                path: path, 
+                nodes: nodes, 
+                urlTemplate: cluster,
+                urlClusterText:cluster.toString() 
+            });
+            
         });    
         return tmpArray;
 
@@ -113,7 +120,7 @@ function getPathAndUrlsArrayfromAnchors() {
         var values = groupedByPath[path];
         var links = values.map((a) => { return a.url; });
         var clusters = findUriClusters(links);
-        pathsWithClusters=pathsWithClusters.concat(addClusters(clusters,values,path)).
+        pathsWithClusters=pathsWithClusters.concat(splitByClusters(clusters,values,path)).
             filter(x=>x.nodes.length>0);
 
     });
@@ -127,14 +134,14 @@ function getPathAndUrlsArrayfromAnchors() {
 function debugNbeautifyPathsWithClusters(pathsWithClusters) {
     var resultObj={};
     pathsWithClusters.forEach((obj) => {
-        if (obj.nodes.length > 0)
-            resultObj.addToKey("path: " + obj.path + " | cluster: " + obj.urlTemplate.toString(), obj);
+            resultObj.addToKey( "path: " + obj.path + " | cluster: " + obj.urlTemplate.toString(), obj);
     });
 
     Object.keys(resultObj).forEach((key) => {
         var item = resultObj[key][0];
         resultObj[key] = item.nodes.map(node => {
-            return { node: node, urlTemplate: item.urlTemplate,  path: item.path, uriClusterText:item.urlTemplate.toString()};
+            return { node: node, urlTemplate: item.urlTemplate,  path: item.path, 
+                urlClusterText:item.urlTemplate.toString()};
         });
     });
     return resultObj;
