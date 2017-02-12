@@ -98,11 +98,9 @@ function getPathAndUrlsArrayfromAnchors() {
         var idx=el.href.indexOf('#');      
         shortHref=idx>=0? el.href.slice(0, idx) : el.href;
 
-
         if (shortHref) {
             anchorsArray.push({href: shortHref, html: el.innerHTML, path: getDomPath(el)});
         }
-        
     });
 
     anchorsArray.forEach(function (anchorObj) {
@@ -122,7 +120,6 @@ function getPathAndUrlsArrayfromAnchors() {
     });
 
     log(anchorsByPathArrayObj);
-    
 
     Object.keys(anchorsByPathArrayObj).forEach(function (path) {
         var urlClusterArray = anchorsByPathArrayObj[path];
@@ -131,7 +128,10 @@ function getPathAndUrlsArrayfromAnchors() {
                 var expr = '^' + cluster.toRegexp() + "$";
                 if (anchorObj.href.match(expr)) {
                     clusterString=cluster.toString();
-                    resultObj.addToKey("path: " + path + " | cluster: " + cluster.path, anchorObj);
+                    resultObj.addToKey(
+                        "path: " + path + 
+                        " | cluster: " + cluster.path, anchorObj
+                    );
                 }     
             });
         });
@@ -152,9 +152,6 @@ function testPathAndUrls(resultObj,l,el1,el2) {
     console.log("test "+ok);
     console.log(resultObj);
 }
-
-
-
 
 var pathAndUrlsArrayfromAnchors = getPathAndUrlsArrayfromAnchors();
  
