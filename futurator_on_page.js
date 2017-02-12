@@ -57,13 +57,12 @@ function getDomPath(el) {
         el = el.parentNode;
         if (el.nodeType === 11) { // for shadow dom
             el = el.host;
-        }        
+        }
     }
     stack.splice(0, 1); // removes the html element
     return stack.join(' > ');
 }
  
-/*********FUNCTIONS********/
 Object.prototype.addToKey = function (key, value) {
     if (key in this)
         this[key].push(value);
@@ -78,6 +77,7 @@ function log(obj) {
     }
 }
 
+
 function getPathAndUrlsArrayfromAnchors() {
     //vars
     //return object
@@ -88,80 +88,51 @@ function getPathAndUrlsArrayfromAnchors() {
     var anchorsByPathArrayObj = {};
     //object with key= distinct DOM path, value = distinct URItemplates 
     var uriClusterByPathObj = {};
-    //get clusters
-    var linkClusters = findUriClusters([].slice.call(document.links).map(a=>a.href));
+    //get ahchors
+    var anchors = Array.prototype.slice.call(document.links);
 
     //Collect all anchors in DOM
-    var anchors = document.querySelectorAll("a");
-    //Populate anchorsArray with elements
+    //Populate anchorsArray with robust elements
     anchors.forEach(function (el, index) {
-        var shortHref;       
-        var href = el.href;
-        if(href !== undefined) {
-            var idx = href.indexOf('#');
-            if (idx >= 0)
-                shortHref = href.slice(0, idx);
-            else
-                shortHref = href;
+        var shortHref; 
+        var idx=el.href.indexOf('#');      
+        shortHref=idx>=0? el.href.slice(0, idx) : el.href;
 
-            if (shortHref !== "") {
-                anchorsArray.push({href: shortHref, html: el.innerHTML, path: getDomPath(el)});
-            }
+
+        if (shortHref) {
+            anchorsArray.push({href: shortHref, html: el.innerHTML, path: getDomPath(el)});
         }
         
     });
-    //add to anchorsArray elements linkClusters, based on element.href vs 
-    //each cluster regex
-    anchorsArray.forEach(function (el) {
-        el.linkClusters = [];
-        linkClusters.forEach(function (cluster) {
-            var expr = '^' + cluster.toRegexp() + "$";
-            if (el.href.match(expr)) {
-                el.linkClusters.push(cluster);
-            }
-        });
-    });
-    //populating object with key = common DOM path, 
-    //value = array of anchors in this DOM path
+
     anchorsArray.forEach(function (anchorObj) {
         anchorsByPathArrayObj.addToKey(anchorObj.path, anchorObj);
     });
-    //Now in anchorsByPathArrayObj we have all distinct paths with anchors
-    log(anchorsByPathArrayObj);
-    //Look inside each distinct path in anchorsByPathArrayObj and
-    //find findUriClusters (>0) there. Store them
+
     Object.keys(anchorsByPathArrayObj).forEach(function (path) { 
         var clusters = findUriClusters(        
             anchorsByPathArrayObj[path]?anchorsByPathArrayObj[path].map(anchorObj =>
                 anchorObj.href):[]        
         );
         if (clusters.length > 0) {
-            uriClusterByPathObj[path] = clusters;
+            anchorsByPathArrayObj[path].map(a=> a.linkClusters = clusters);
+        } else {
+            delete anchorsByPathArrayObj[path];
         }
     });
-    //Now we have all distinct paths with 1 or more UriClusters.
-    log(uriClusterByPathObj);
-    Object.keys(anchorsByPathArrayObj).forEach(function (path) {
-        anchorsByPathArrayObj[path].forEach(function (anchorObj) {
-            anchorObj.linkClusters = anchorObj.linkClusters.filter(cluster =>                 
-                (uriClusterByPathObj[path]?uriClusterByPathObj[path]
-                    .map(pathCluster => pathCluster.path):[])
-                        .indexOf(cluster.path) >= 0
-            );
-        });
-    });
-    //Now in anchorsByPathArrayObj we have all distinct paths with anchors
-    //and with right UriClusters.
-    //In short we had now there are UriClasters in anchors
-    //that are equal instide path
-    log(anchorsByPathArrayObj);
 
-    //Add to result objects with distinct path and cluster 
+    log(anchorsByPathArrayObj);
+    
+
     Object.keys(anchorsByPathArrayObj).forEach(function (path) {
         var urlClusterArray = anchorsByPathArrayObj[path];
-        urlClusterArray.forEach(function (anchorObj) {
-            anchorObj.linkClusters.forEach(function (cluster) {
-                resultObj.addToKey("path: " + path + " | cluster: " + cluster.path, anchorObj);
+        urlClusterArray.forEach(function (anchorObj) {       
+           anchorObj.linkClusters.forEach(function (cluster) {
+                var expr = '^' + cluster.toRegexp() + "$";
+                if (anchorObj.href.match(expr)) {
+                    clusterString=cluster.toString();
+                    resultObj.addToKey("path: " + path + " | cluster: " + cluster.path, anchorObj);
+                }     
             });
         });
     });
@@ -170,7 +141,29 @@ function getPathAndUrlsArrayfromAnchors() {
 }
 
 
+function testPathAndUrls(resultObj,l,el1,el2) {
+    var ok="pathed";
+    if(Object.keys(resultObj).length!=l)
+        ok="failed";
+    if(resultObj[el1.key].length!=el1.l)    
+       ok="failed";
+    if(resultObj[el2.key].length!=el2.l)    
+        ok="failed";      
+    console.log("test "+ok);
+    console.log(resultObj);
+}
+
+
+
 
 var pathAndUrlsArrayfromAnchors = getPathAndUrlsArrayfromAnchors();
-log("result");
-log(pathAndUrlsArrayfromAnchors);
+ 
+testPathAndUrls(
+    pathAndUrlsArrayfromAnchors,
+    7,
+    {key:"path: body > div > div > div > div > div > a | cluster: /futurator.ru/web/catalog/{T}.html",l:4},
+    {key:"path: body > div > div > div > div > ul > li > a | cluster: /futurator.ru/web/{T}.html",l:9}
+);
+
+
+
