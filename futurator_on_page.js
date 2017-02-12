@@ -15,12 +15,8 @@ function sortUnique(arr, equality) {
 }
 
 function findUriClusters(links) {
-    links = links.filter(x => x !== undefined).map(link => {
-        var idx = link.indexOf('#');
-        if (idx >= 0)
-            return link.slice(0, idx);
-        else
-            return link;
+    links = links.map(link => { 
+        return getUrlWithoutHash(link);
     }).filter(x => x.length > 0);
     var refs = sortUnique(links).map(a => new URI(a));
     var clusters = [];
@@ -77,7 +73,16 @@ function log(obj) {
     }
 }
 
+function addClusters(clusters,values,path) {
+        var tmpArray=[];
+        clusters.forEach((cluster) => {
+            var expr = '^' + cluster.toRegexp() + "$";
+            var nodes = values.filter(awi => awi.url.match(expr)).map(awi => awi.anchor);
+            tmpArray.push({ path: path, nodes: nodes, urlTemplate: cluster,uriClusterText:cluster.toString() });
+        });    
+        return tmpArray;
 
+}
 
 function getUrlWithoutHash(href) {
     var idx = href.indexOf('#');
@@ -87,15 +92,14 @@ function getUrlWithoutHash(href) {
 
 function getPathAndUrlsArrayfromAnchors() {
     var groupedByPath = {};
-    var pathWithClusters = [];
-    var resultObj = {};
+    var pathsWithClusters = [];
 
     var anchors = Array.prototype.slice.call(document.links);
 
     var anchorsWithInfo = anchors.map(a => {
         return { anchor: a, url: getUrlWithoutHash(a.href), path: getDomPath(a) };
     }).
-        filter(obj => { return obj.url !== ""; });
+        filter( x => x.url.length > 0 );
 
     log(anchorsWithInfo);
 
@@ -109,29 +113,34 @@ function getPathAndUrlsArrayfromAnchors() {
         var values = groupedByPath[path];
         var links = values.map((a) => { return a.url; });
         var clusters = findUriClusters(links);
-        clusters.forEach((cluster) => {
-            var expr = '^' + cluster.toRegexp() + "$";
-            var nodes = values.filter(awi => awi.url.match(expr)).map(awi => awi.anchor);
-            pathWithClusters.push({ path: path, nodes: nodes, urlTemplate: cluster });
-        });
+        pathsWithClusters=pathsWithClusters.concat(addClusters(clusters,values,path)).
+            filter(x=>x.nodes.length>0);
+
     });
     
-    log(pathWithClusters);
+    return pathsWithClusters;
 
-    pathWithClusters.forEach((obj) => {
+
+
+}
+
+function debugNbeautifyPathsWithClusters(pathsWithClusters) {
+    var resultObj={};
+    pathsWithClusters.forEach((obj) => {
         if (obj.nodes.length > 0)
-            resultObj.addToKey("path: " + obj.path + " | cluster: " + obj.urlTemplate.path, obj);
+            resultObj.addToKey("path: " + obj.path + " | cluster: " + obj.urlTemplate.toString(), obj);
     });
 
     Object.keys(resultObj).forEach((key) => {
         var item = resultObj[key][0];
         resultObj[key] = item.nodes.map(node => {
-            return { node: node, urlTemplate: item.urlTemplate, path: item.path };
+            return { node: node, urlTemplate: item.urlTemplate,  path: item.path, uriClusterText:item.urlTemplate.toString()};
         });
     });
     return resultObj;
 }
 
-var pathAndUrlsArrayfromAnchors = getPathAndUrlsArrayfromAnchors();
-log(pathAndUrlsArrayfromAnchors);
+var result = getPathAndUrlsArrayfromAnchors();
+log(result);
+log(debugNbeautifyPathsWithClusters(result));
 
