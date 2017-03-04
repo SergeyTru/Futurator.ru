@@ -224,7 +224,7 @@ findRootsSingle(result[0]);
 //findRoots(result);
 console.log(result[0].nodes[0].root);
 
-composeRootSingle(result[0]);
+
 
 function composeRootSingle(res) {
     var rootArray=[];
@@ -263,10 +263,41 @@ function composeRootSingle(res) {
     });	
     */
     console.log("totalRoot");
-    console.log(totalRoot); // document.querySelectorAll("body > div > div > div > div > ul > li") - for All
-
+    console.log(totalRoot); // document.querySelectorAll("body > div > div > div > div > ul > li") - for group
+    return totalRoot;
 }
 
+
+var totalRoot=composeRootSingle(result[0]);
+
+cardEl(result[0],totalRoot);
+
+
+function cardEl(group,totalRoot) {
+    var allEls=document.querySelectorAll(totalRoot);
+    var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
+
+    group.nodes.forEach(function(node){
+
+      node.root.forEach(function(nodeRoot){
+
+        allEls.forEach(function(el){
+
+            if(el===nodeRoot) {
+                node.true_root=el;
+                node.true_root.style.border="6px dashed #CC0";
+                //https://www.paulirish.com/2009/random-hex-color-code-snippets/
+                node.true_root.style['background-color']=bgColor;               
+            }
+        });
+
+          
+      });
+
+
+    });
+
+}
 
 
 //console.log(debugNbeautifyPathsWithClusters(result));
