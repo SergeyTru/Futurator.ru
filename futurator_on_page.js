@@ -49,6 +49,10 @@ function getDomPath(el) {
     var stack = [];
     while (el.parentNode !== null) {
         var nodeName = el.nodeName.toLowerCase();
+        /*
+        if(el.className)
+            nodeName+="."+el.className;
+        */
         stack.unshift(nodeName);
         el = el.parentNode;
         if (el.nodeType === 11) { // for shadow dom
@@ -67,7 +71,7 @@ Object.prototype.addToKey = function (key, value) {
 };
 
 function log(obj) {
-    debug = true;
+    debug = false;
     if (debug) {
         console.log(obj);
     }
@@ -151,3 +155,118 @@ var result = getPathAndUrlsArrayfromAnchors();
 log(result);
 log(debugNbeautifyPathsWithClusters(result));
 
+
+ 
+function findRoots(PathAndUrlsArrayfromAnchors) {
+    PathAndUrlsArrayfromAnchors.forEach((obj) => {
+        findRootsSingle(obj);
+    });	
+}
+ 
+
+
+
+function findRoot(nodeMain,node2) {//check if nodeMain===node2 before launch
+    var rootNode;
+	var parent1=nodeMain.parentNode;
+	var parent2=node2.parentNode;
+	if(parent1===document.body)
+		return nodeMain; //elements have exact same roots
+	isDistinct=(parent1!==parent2);
+	if(isDistinct) {
+		rootNode=findRoot(parent1,parent2);
+	} else {		
+        return nodeMain; //comonRoot for both nodes found. Return previous
+	}
+    return rootNode;
+}
+
+
+function findRootsSingle(obj) {
+    var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
+    if(obj.nodes.length<2) 
+        return false;
+    obj.nodes.forEach((nodeMain,i) => {
+        nodeMain.root=[];
+        obj.nodes.forEach((node2,j) => {
+            if((nodeMain!==node2))
+            {
+                comonRoot=findRoot(nodeMain,node2);
+                if(comonRoot)							
+                    nodeMain.root.push(comonRoot);
+                else {
+                    log("failed root search for nodes");
+                    //nodeMain.root.push("failed root search for nodes");
+                }
+            }
+        });	
+        /*        
+        console.log(i);
+        console.log(nodeMain.root);
+      
+        nodeMain.root=nodeMain.root.reduce(function(pV, cV, index, array) {//HACK
+            if(getDomPath(pV).split(">").length>=getDomPath(cV).split(">")) 
+            {
+                return cV; 
+            } else {
+                return pV;  
+            }
+        });	
+        nodeMain.root.style.border="6px dashed #CC0";
+        //https://www.paulirish.com/2009/random-hex-color-code-snippets/
+        nodeMain.root.style['background-color']=bgColor;
+        */
+
+
+    });
+}
+findRootsSingle(result[0]);
+//findRoots(result);
+console.log(result[0].nodes[0].root);
+
+composeRootSingle(result[0]);
+
+function composeRootSingle(res) {
+    var rootArray=[];
+    rootArray=res.nodes.reduce(function(prev, next, i, a) {//HACK
+         if(typeof(prev.root)!=="undefined")
+            prev=prev.root;
+         return prev.concat(next.root);
+    });	
+    console.log("rootArray");
+    console.log(rootArray);
+
+   
+    var rootArrayPath=[];
+    rootArrayPath=rootArray.map((rootEl)=>getDomPath(rootEl));
+    console.log("rootArrayPath");
+    console.log(rootArrayPath);
+
+    var totalRoot=rootArrayPath.reduce(function(prev, next, index, array) {//HACK
+        if(prev.split(">").length>=next.split(">"))
+        {
+            return next; 
+        } else {
+            return prev;  
+        }
+    });	
+
+/*
+
+    var totalRoot=rootArray.reduce(function(pV, cV, index, array) {//HACK
+        if(getDomPath(pV).split(">").length>=getDomPath(cV).split(">")) 
+        {
+            return cV; 
+        } else {
+            return pV;  
+        }
+    });	
+    */
+    console.log("totalRoot");
+    console.log(totalRoot); // document.querySelectorAll("body > div > div > div > div > ul > li") - for All
+
+}
+
+
+
+//console.log(debugNbeautifyPathsWithClusters(result));
