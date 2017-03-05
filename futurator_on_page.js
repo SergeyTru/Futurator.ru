@@ -220,9 +220,11 @@ function findRootsSingle(obj) {
 
     });
 }
-findRootsSingle(result[0]);
+
+
+findRootsSingle(result[resItem]);
 //findRoots(result);
-console.log(result[0].nodes[0].root);
+//console.log(result[0].nodes[0].root);
 
 
 
@@ -268,9 +270,9 @@ function composeRootSingle(res) {
 }
 
 
-var totalRoot=composeRootSingle(result[0]);
+var totalRoot=composeRootSingle(result[resItem]);
 
-cardEl(result[0],totalRoot);
+cardEl(result[resItem],totalRoot);
 
 
 function cardEl(group,totalRoot) {
