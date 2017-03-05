@@ -172,8 +172,8 @@ function findRoot(nodeMain,node2) {//check if nodeMain===node2 before launch
 	var parent2=node2.parentNode;
 	if(parent1===document.body)
 		return nodeMain; //elements have exact same roots
-	isDistinct=(parent1!==parent2);
-	if(isDistinct) {
+
+	if(parent1!==parent2) {
 		rootNode=findRoot(parent1,parent2);
 	} else {		
         return nodeMain; //comonRoot for both nodes found. Return previous
@@ -183,7 +183,10 @@ function findRoot(nodeMain,node2) {//check if nodeMain===node2 before launch
 
 
 function findRootsSingle(obj) {
-    var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
+   //var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
+
+
+
     if(obj.nodes.length<2) 
         return false;
     obj.nodes.forEach((nodeMain,i) => {
@@ -221,6 +224,7 @@ function findRootsSingle(obj) {
     });
 }
 
+var resItem=5;
 
 findRootsSingle(result[resItem]);
 //findRoots(result);
@@ -271,6 +275,10 @@ function composeRootSingle(res) {
 
 
 var totalRoot=composeRootSingle(result[resItem]);
+//result[0].nodes[3].root.push(result[0].nodes[3].parentNode); hack - вставим правильную карточку сюда
+
+
+
 
 cardEl(result[resItem],totalRoot);
 
@@ -278,9 +286,30 @@ cardEl(result[resItem],totalRoot);
 function cardEl(group,totalRoot) {
     var allEls=document.querySelectorAll(totalRoot);
     var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
+    //Добавить уникальный ID каждому элементу (чтобы его потом найти)
+    group.nodes.forEach(function(node,i){
+        node.id = "theId_"+resItem+"_"+i;
+    });    
 
+    console.log(group.nodes);
+    group.nodes.forEach(function(node,i){
+
+        var el=document.querySelector(totalRoot+" #"+node.id);
+        node.true_root=el;
+        node.true_root.style.border="6px dashed #CC0";
+        //https://www.paulirish.com/2009/random-hex-color-code-snippets/
+        node.true_root.style['background-color']=bgColor;               
+
+
+    });    
+
+
+
+/*
     group.nodes.forEach(function(node){
 
+      //потому что мы не умеем искать нормально элемент, мы ищем его среди рутов
+      //а надо по как нашу карточку  body > div > div > div > div > ul > li
       node.root.forEach(function(nodeRoot){
 
         allEls.forEach(function(el){
@@ -298,6 +327,7 @@ function cardEl(group,totalRoot) {
 
 
     });
+    */
 
 }
 
