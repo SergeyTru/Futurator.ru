@@ -153,12 +153,12 @@ function debugNbeautifyPathsWithClusters(pathsWithClusters) {
 
 
 function setCards(groups) {
-    groups.forEach((obj) => {
-        findCardsSingle(obj);
+    groups.forEach((group, pos) => {
+        findCardsSingle(group);
 
-        composeCardSingle(obj);
+        composeCardSingle(group);
 
-        cardEl(obj);        
+        cardEl(group,pos);        
     });	
 }
 
@@ -239,7 +239,7 @@ function composeCardSingle(group) {
 
 
 
-function cardEl(group) {
+function cardEl(group,pos) {
 
     //https://www.paulirish.com/2009/random-hex-color-code-snippets/    
     var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
@@ -253,6 +253,7 @@ function cardEl(group) {
             cardNode=cardNode.parentNode;
         }
         node.cardNode=cardNode;
+        node.cardNode.id = "cardId_"+pos+"_"+index;      
         node.cardNode.style.border="6px dashed #CC0";
         node.cardNode.style['background-color']=bgColor;               
  
