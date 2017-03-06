@@ -248,7 +248,7 @@ function composeCardSingle(res) {
     console.log("CardArrayPath");
     console.log(CardArrayPath);
 
-    var totalCard=CardArrayPath.reduce(function(prev, next, index, array) {//HACK
+    var totalCard=CardArrayPath.reduce(function(prev, next, index, array) {//Выбираем самый глубокий путь 
         if(prev.split(">").length>=next.split(">"))
         {
             return next; 
@@ -280,10 +280,44 @@ var totalCard=composeCardSingle(result[resItem]);
 
 
 
+//cardElOld(result[resItem],totalCard);
+
 cardEl(result[resItem],totalCard);
 
-
 function cardEl(group,totalCard) {
+
+    //https://www.paulirish.com/2009/random-hex-color-code-snippets/    
+    var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
+    
+    var cardWayLength=totalCard.split(">").length;
+    var groupwayLength=group.path.split(">").length;
+
+    group.nodes.forEach(function(node,index){
+        var cardNode=node;
+        for(var i=0; i<groupwayLength-cardWayLength; i++) {
+            cardNode=cardNode.parentNode;
+        }
+        node.cardNode=cardNode;
+        node.cardNode.style.border="6px dashed #CC0";
+        node.cardNode.style['background-color']=bgColor;               
+ 
+    });    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function cardElOld(group,totalCard) {
     var allEls=document.querySelectorAll(totalCard);
     var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
     //Добавить уникальный ID каждому элементу (чтобы его потом найти)
