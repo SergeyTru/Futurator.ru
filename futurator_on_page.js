@@ -154,11 +154,14 @@ function debugNbeautifyPathsWithClusters(pathsWithClusters) {
 
 function setCards(groups) {
     groups.forEach((group, pos) => {
-        findCardsSingle(group);
+		//if(pos==2) { 
+		
+			findCardsSingle(group);
 
-        composeCardSingle(group);
+			composeCardSingle(group);
 
-        cardEl(group,pos);        
+			cardEl(group,pos);        
+		//}
     });	
 }
 
@@ -199,6 +202,7 @@ function findCardsSingle(obj) {
             }
         });	
     });
+	
 }
 
 
@@ -225,9 +229,9 @@ function composeCardSingle(group) {
         group.pathToCard=CardArrayPath.reduce(function(prev, next, index, array) {
             if(prev.split(">").length>=next.split(">"))
             {
-                return next; 
+                return prev; 
             } else {
-                return prev;  
+                return next;  
             }
         });	
     } else {
@@ -253,7 +257,8 @@ function cardEl(group,pos) {
             cardNode=cardNode.parentNode;
         }
         node.cardNode=cardNode;
-        node.cardNode.id = "cardId_"+pos+"_"+index;      
+        node.cardNode.id = "cardId_"+pos+"_"+index;  
+		node.cardNode.className+= " card_class_group_"+pos;  
         node.cardNode.style.border="6px dashed #CC0";
         node.cardNode.style['background-color']=bgColor;               
  
@@ -270,7 +275,20 @@ log(debugNbeautifyPathsWithClusters(groups));
 
 
 setCards(groups);
- 
+runTests(groups);
+
+function runTests(groups) {
+	//test_class_group_2 card_class_group_2
+    groups.forEach((group, pos) => {
+		if(document.querySelector(".test_class_group_"+pos)==document.querySelector(".card_class_group_"+pos)) {
+			console.log("Test for group "+pos+" - success");
+		}
+		else {
+			console.log("!Test for group "+pos+" - failed");
+		}
+    });	
+	
+}
 
 /*
 //Single Test Visual
