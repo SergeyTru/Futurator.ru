@@ -151,19 +151,16 @@ function debugNbeautifyPathsWithClusters(pathsWithClusters) {
     return resultObj;
 }
 
-var result = getPathAndUrlsArrayfromAnchors();
-log(result);
-log(debugNbeautifyPathsWithClusters(result));
 
-
- 
-function findCards(PathAndUrlsArrayfromAnchors) {
-    PathAndUrlsArrayfromAnchors.forEach((obj) => {
+function setCards(groups) {
+    groups.forEach((obj) => {
         findCardsSingle(obj);
+
+        composeCardSingle(obj);
+
+        cardEl(obj);        
     });	
 }
- 
-
 
 
 function findCard(nodeMain,node2) {//check if nodeMain===node2 before launch
@@ -182,114 +179,72 @@ function findCard(nodeMain,node2) {//check if nodeMain===node2 before launch
 }
 
 
+
 function findCardsSingle(obj) {
-   //var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
-
-
-
     if(obj.nodes.length<2) 
         return false;
+    var saveNodes=[];
     obj.nodes.forEach((nodeMain,i) => {
-        nodeMain.Card=[];
+        saveNodes.push(nodeMain);
+        nodeMain.Card=[];        
         obj.nodes.forEach((node2,j) => {
-            if((nodeMain!==node2))
+            if((saveNodes.indexOf(node2)==-1))
             {
                 comonCard=findCard(nodeMain,node2);
                 if(comonCard)							
                     nodeMain.Card.push(comonCard);
                 else {
                     log("failed Card search for nodes");
-                    //nodeMain.Card.push("failed Card search for nodes");
                 }
             }
         });	
-        /*        
-        console.log(i);
-        console.log(nodeMain.Card);
-      
-        nodeMain.Card=nodeMain.Card.reduce(function(pV, cV, index, array) {//HACK
-            if(getDomPath(pV).split(">").length>=getDomPath(cV).split(">")) 
-            {
-                return cV; 
-            } else {
-                return pV;  
-            }
-        });	
-        nodeMain.Card.style.border="6px dashed #CC0";
-        //https://www.paulirish.com/2009/random-hex-color-code-snippets/
-        nodeMain.Card.style['background-color']=bgColor;
-        */
-
-
     });
 }
 
-var resItem=5;
-
-findCardsSingle(result[resItem]);
-//findCards(result);
-//console.log(result[0].nodes[0].Card);
 
 
 
-function composeCardSingle(res) {
-    var CardArray=[];
-    CardArray=res.nodes.reduce(function(prev, next, i, a) {//HACK
-         if(typeof(prev.Card)!=="undefined")
-            prev=prev.Card;
-         return prev.concat(next.Card);
-    });	
-    console.log("CardArray");
-    console.log(CardArray);
+function composeCardSingle(group) {
 
-   
-    var CardArrayPath=[];
-    CardArrayPath=CardArray.map((CardEl)=>getDomPath(CardEl));
-    console.log("CardArrayPath");
-    console.log(CardArrayPath);
+    if(group.nodes.length> 1)
+    {
+        //get array of all cards in group
+        var CardArray=[];
+        CardArray=group.nodes.reduce(function(prev, next, i, a) {//HACK
+            if(typeof(prev.Card)!=="undefined")
+                prev=prev.Card;
+            return prev.concat(next.Card);
+        });	
 
-    var totalCard=CardArrayPath.reduce(function(prev, next, index, array) {//Выбираем самый глубокий путь 
-        if(prev.split(">").length>=next.split(">"))
-        {
-            return next; 
-        } else {
-            return prev;  
-        }
-    });	
 
-/*
+        //get array of all path for card in group   
+        var CardArrayPath=[];
+        CardArrayPath=CardArray.map((CardEl)=>getDomPath(CardEl));
 
-    var totalCard=CardArray.reduce(function(pV, cV, index, array) {//HACK
-        if(getDomPath(pV).split(">").length>=getDomPath(cV).split(">")) 
-        {
-            return cV; 
-        } else {
-            return pV;  
-        }
-    });	
-    */
-    console.log("totalCard");
-    console.log(totalCard); // document.querySelectorAll("body > div > div > div > div > ul > li") - for group
-    return totalCard;
+        //Select the deepest
+        group.pathToCard=CardArrayPath.reduce(function(prev, next, index, array) {
+            if(prev.split(">").length>=next.split(">"))
+            {
+                return next; 
+            } else {
+                return prev;  
+            }
+        });	
+    } else {
+        group.pathToCard=getDomPath(group.nodes[0].parentNode);
+    }
+
 }
 
 
-var totalCard=composeCardSingle(result[resItem]);
-//result[0].nodes[3].Card.push(result[0].nodes[3].parentNode); hack - вставим правильную карточку сюда
 
 
-
-
-//cardElOld(result[resItem],totalCard);
-
-cardEl(result[resItem],totalCard);
-
-function cardEl(group,totalCard) {
+function cardEl(group) {
 
     //https://www.paulirish.com/2009/random-hex-color-code-snippets/    
     var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
     
-    var cardWayLength=totalCard.split(">").length;
+    var cardWayLength=group.pathToCard.split(">").length;
     var groupwayLength=group.path.split(">").length;
 
     group.nodes.forEach(function(node,index){
@@ -306,81 +261,24 @@ function cardEl(group,totalCard) {
 
 
 
+var groups = getPathAndUrlsArrayfromAnchors();
+ 
+//groups=groups.splice(0,1);
+log(groups);
+log(debugNbeautifyPathsWithClusters(groups));
 
 
-
-
-
-
-
-
-
-
-
-function cardElOld(group,totalCard) {
-    var allEls=document.querySelectorAll(totalCard);
-    var bgColor='#'+Math.floor(Math.random()*16777215).toString(16);
-    //Добавить уникальный ID каждому элементу (чтобы его потом найти)
-    group.nodes.forEach(function(node,i){
-        node.id = "theId_"+resItem+"_"+i;
-    });    
-
-
-    console.log(group.nodes);
-    /*
-    group.nodes.forEach(function(node,i){
-
-        var el=document.querySelector(totalCard+" #"+node.id).parentNode;
-        node.true_Card=el;
-        node.true_Card.style.border="6px dashed #CC0";
-        //https://www.paulirish.com/2009/random-hex-color-code-snippets/
-        node.true_Card.style['background-color']=bgColor;               
-
-
-    });    
-
-*/
-
-/*
-    group.nodes.forEach(function(node){
-
-      //потому что мы не умеем искать нормально элемент, мы ищем его среди рутов
-      //а надо по как нашу карточку  body > div > div > div > div > ul > li
-      node.Card.forEach(function(nodeCard){
-
-        allEls.forEach(function(el){
-
-            if(el===nodeCard) {
-                node.true_Card=el;
-                node.true_Card.style.border="6px dashed #CC0";
-                //https://www.paulirish.com/2009/random-hex-color-code-snippets/
-                node.true_Card.style['background-color']=bgColor;               
-            }
-        });
-
-          
-      });
-
-
-    });
-    */
-    group.nodes.forEach(function(node){
-
-
-        allEls.forEach(function(el){
-
-            if(el.contains(document.querySelector(totalCard+" #"+node.id).parentNode)) { //проверку на то, что node (мы можем взять его по айти) является сыном el
-                node.true_Card=el;
-                node.true_Card.style.border="6px dashed #CC0";
-                //https://www.paulirish.com/2009/random-hex-color-code-snippets/
-                node.true_Card.style['background-color']=bgColor;               
-            }
-        });
-
-    });    
+setCards(groups);
  
 
-}
+/*
+//Single Test Visual
 
+var resItem=0;
 
-//console.log(debugNbeautifyPathsWithClusters(result));
+findCardsSingle(groups[resItem]);
+
+composeCardSingle(groups[resItem]);
+
+cardEl(groups[resItem]);
+*/
