@@ -15,6 +15,7 @@ function sortUnique(arr, equality) {
 }
 
 function findUriClusters(links) {
+    //Ставить флажок если один пустой, а другой цифра
     links = links.map(link => { 
         return getUrlWithoutHash(link);
     }).filter(x => x.length > 0);
@@ -277,8 +278,8 @@ var groups = getPathAndUrlsArrayfromAnchors();
 //log(debugNbeautifyPathsWithClusters(groups));
 
 
-//setCards(groups);
-//runTests(groups);
+setCards(groups);
+runTests(groups);
 
 function runTests(groups) {
 	//test_class_group_2 card_class_group_2
@@ -304,6 +305,7 @@ composeCardSingle(groups[resItem]);
 
 cardEl(groups[resItem]);
 */
+/*
     var groupedByPath = {};
     var pathsWithClusters = [];
     var anchors = Array.prototype.slice.call(document.images);
@@ -319,16 +321,16 @@ cardEl(groups[resItem]);
     });
 
     console.log(groupedByPath);
-
+    groupedByPath=[groupedByPath["body > div > div > div > div > div > div > div > img"]];
     Object.keys(groupedByPath).forEach((path) => {
         var values = groupedByPath[path];
         var links = values.map((a) => { return a.url; });
         var clusters = findUriClusters(links);
-        /*
+        
         console.log("clusters:");
         console.log(clusters);
         console.log("<>");
-        */
+        
         var split=splitByClusters(clusters,values,path);
         console.log(split);
         pathsWithClusters=pathsWithClusters.concat(split).
@@ -337,3 +339,11 @@ cardEl(groups[resItem]);
     });
     console.log("pathsWithClusters");
     console.log(pathsWithClusters);
+
+*/
+
+/*
+    console.log("------------------");
+    testLinks=["http://html/futurator.ru/web/images/pi.jpg", "http://html/futurator.ru/web/images/pi1.jpg", "http://html/futurator.ru/web/images/pi2.jpg", "http://html/futurator.ru/web/images/pi3.jpg"]
+    console.log(findUriClusters(testLinks));
+    */

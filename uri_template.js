@@ -3,11 +3,12 @@
 // Note: this code does not handle escapes like "%DE%DA".
 //       You need to handle them before this code
 
-function UriTemplate(protocol, authority, path, params) {
+function UriTemplate(protocol, authority, path, params,flags) {
   this.protocol = protocol
   this.authority = authority
   this.path = path
   this.params = params
+  this.flag = flags
 }
 
 UriTemplate.equals = function(a, b) {
@@ -39,15 +40,20 @@ UriTemplate.prototype.toString = function() {
 };
 
 UriTemplate.prototype.toRegexp = function() {
+  var regFuzzy=true;
+  var limiter="+";
+  if(regFuzzy)
+    limiter="*";
+
   //regexp is not fully functional: js regexp does not handle unicode
   var replacer = function(match, p1) {
     p1 = p1.toUpperCase();
     if (p1 === 'N')
-      return "\\d+";
+      return "\\d"+limiter;
     if (p1 === 'T')
-      return "[\\w\\+А-Яа-я]+";
+      return "[\\w\\+А-Яа-я]"+limiter;
     if (p1 === '/')
-      return "[\\wА-Яа-я/]+";
+      return "[\\wА-Яа-я/]"+limiter;
     if (p1 === '*')
       return ".*";
     throw "Unhandled symbol " + match;
@@ -302,5 +308,15 @@ var templateForUris = function(url1, url2) {
     pathParts = '/' + pathParts;
   if (path1.endsWith('/') && path2.endsWith('/'))
     pathParts += '/';
-  return new UriTemplate(url1.getScheme(), auth, pathParts, query);
+
+  var flags=null;
+  if( (
+      (path1.match(/\d\..*$/)!==null) && 
+      (path2.match(/\d\..*$/)===null)
+    ) || (
+      (path2.match(/\d\..*$/)!==null) &&  
+      (path1.match(/\d\..*$/)===null)
+      )  
+    ) flags={fuzzyNumberEnd:true};
+  return new UriTemplate(url1.getScheme(), auth, pathParts, query,flags);
 }
