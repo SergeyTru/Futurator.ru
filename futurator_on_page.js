@@ -29,6 +29,7 @@ function findUriClusters(links) {
     return sortUnique(clusters, UriTemplate.equals);
 }
 
+/*
 function clusterize() {
     var linkClusters = findUriClusters([].slice.call(document.links).map(a => a.href));
     var imgClusters = findUriClusters([].slice.call(document.images).map(img => img.src));
@@ -40,6 +41,7 @@ function clusterize() {
 }
 
 //clusterize();
+*/
 
 /* DomPath from stackoverflow http://stackoverflow.com/a/16742828 */
 function getDomPath(el) {
@@ -270,12 +272,13 @@ function cardEl(group,pos) {
 var groups = getPathAndUrlsArrayfromAnchors();
  
 //groups=groups.splice(0,1);
-log(groups);
-log(debugNbeautifyPathsWithClusters(groups));
+
+//log(groups);
+//log(debugNbeautifyPathsWithClusters(groups));
 
 
-setCards(groups);
-runTests(groups);
+//setCards(groups);
+//runTests(groups);
 
 function runTests(groups) {
 	//test_class_group_2 card_class_group_2
@@ -301,3 +304,36 @@ composeCardSingle(groups[resItem]);
 
 cardEl(groups[resItem]);
 */
+    var groupedByPath = {};
+    var pathsWithClusters = [];
+    var anchors = Array.prototype.slice.call(document.images);
+
+    var anchorsWithInfo = anchors.map(a => {
+        return { anchor: a, url: getUrlWithoutHash(a.src), path: getDomPath(a) };
+    }).
+        filter( x => x.url.length > 0 );
+
+    console.log(anchorsWithInfo);
+    anchorsWithInfo.forEach((obj) => {
+        groupedByPath.addToKey(obj.path, obj);
+    });
+
+    console.log(groupedByPath);
+
+    Object.keys(groupedByPath).forEach((path) => {
+        var values = groupedByPath[path];
+        var links = values.map((a) => { return a.url; });
+        var clusters = findUriClusters(links);
+        /*
+        console.log("clusters:");
+        console.log(clusters);
+        console.log("<>");
+        */
+        var split=splitByClusters(clusters,values,path);
+        console.log(split);
+        pathsWithClusters=pathsWithClusters.concat(split).
+            filter(x=>x.nodes.length>0);
+
+    });
+    console.log("pathsWithClusters");
+    console.log(pathsWithClusters);
