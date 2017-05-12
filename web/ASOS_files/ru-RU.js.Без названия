@@ -1,0 +1,49 @@
+﻿define('MasterLayout/Resources/SwitchStore', [], function () {
+	"use strict";
+	return {
+		Message: "Вы меняете магазин на: {Store_Name} Все товары в вашей корзине будут удалены.",
+		CTA: "ИЗМЕНИТЬ МАГАЗИН",
+		Cancel: "ОТМЕНИТЬ",
+		Dismiss: "ЗАКРЫТЬ"
+	};
+});
+
+define('MasterLayout/Resources/ChangeCurrency', [], function () {
+	"use strict";
+	return {
+		Dismiss: "ЗАКРЫТЬ"
+	};
+});
+
+define('MasterLayout/Resources/QuickView', [], function () {
+	"use strict";
+	return {
+		ErrorHeaderText: "Playback Error",
+		ErrorMessageText: "There has been a problem playing the media file.",
+		RefreshButtonText: "Пожалуйста, попробуйте еще раз",
+		NotAvailable: "Недоступно",
+		VatMessage: ""
+	};
+});
+
+define('MasterLayout/Resources/MiniBag', function () {
+    /* jshint quotmark : true */
+	return {
+		"minibag-button-checkout": "ОФОРМИТЬ ЗАКАЗ",
+		"minibag-button-view-bag": "ПРОСМОТРЕТЬ КОРЗИНУ",
+		"minibag-dropdown-over-20-items": "Здесь отображается только 20 товаров.<br/>Пожалуйста, <a>зайдите в вашу корзину</a>, чтобы просмотреть все товары.",
+		"minibag-dropdown-subtotal": "Всего",
+		"minibag-generic-error": "Ой, произошла ошибка. <br/>Пожалуйста, повторите попытку позже.",
+		"minibag-international-delivery-message": "БЕСПЛАТНАЯ ДОСТАВКА ПО ВСЕМУ МИРУ* <br/> * <a>Подробнее здесь</a>",
+		"minibag-item-nosize": "Без размера",
+		"minibag-item-onesize": "Единый размер",
+		"minibag-item-quantity-prefix": "Кол-во",
+		"minibag-item-removed": "Товар удален",
+		"minibag-item-rrp": "Розничная цена %{value}",
+		"minibag-placeholder-title": "Корзина",
+		"minibag-remove-item-icon-title-text": "Удалить этот товар",
+		"minibag-remove-message": "Пропустить это сообщение",
+		"minibag-vat-message": "",
+		"minibag-item-quantity": "(%{quantity})"
+	};
+});

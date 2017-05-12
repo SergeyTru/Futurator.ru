@@ -74,7 +74,7 @@ Object.prototype.addToKey = function (key, value) {
 };
 
 function log(obj) {
-    debug = false;
+    debug = true;
     if (debug) {
         console.log(obj);
     }
@@ -112,7 +112,7 @@ function getUrlWithoutHash(href) {
     - для каждой группы выбираем из Списка самого красивого (с коротким путём) родителя
 
 */
-
+console.log("*************** FTN START **************");
 var groups = getPathAndUrlsArrayfromAnchors();
 //debugNbeautifyPathsWithClustersColors(groups); 
 //groups=groups.splice(0,1);

@@ -1,0 +1,324 @@
+define('Global.Banner.Config',[], function() {
+    var script = document.querySelector('script[data-marketingunitsapi]');
+    var endpoint;
+
+    if (script) {
+        endpoint = script.getAttribute('data-marketingunitsapi');
+    }
+
+    var storage = 'cpt-globalbanner-' + document.documentElement.getAttribute('data-store');
+
+    return {
+        endpoint: endpoint,
+        storage: storage
+    };
+});
+
+define('Storage',[], function() {
+
+    /**
+     * LocalStorage.js
+     * @param {String} endPoint The API to call
+     * @param {Object} callback
+     */
+    function Storage() {}
+
+    /**
+     * get storage item
+     * @param {String} name The name of the storage item
+     */
+    Storage.prototype.get = function(name) {
+        return JSON.parse(localStorage.getItem(name));
+    };
+
+    /**
+     * set storage item
+     * @param {String} name The name of the storage item
+     * @param {String/Array/Object} data The data to be stored
+     */
+    Storage.prototype.set = function(name, data) {
+        localStorage.setItem(name, JSON.stringify(data));
+    };
+
+    /**
+     * check if local storage is available
+     */
+    Storage.prototype.available = function() {
+        try {
+            var storage = window.localStorage,
+                x = '__storage_test__';
+            storage.setItem(x, x);
+            storage.removeItem(x);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    };
+
+    return new Storage();
+});
+
+define('GetData',[], function() {
+    /**
+     * GetData.js
+     * @param {String} endPoint The API to call
+     * @param {Object} callback
+     */
+    function GetData(endpoint) {
+        return new Promise(function(resolve, reject) {
+            var script = document.createElement('script');
+            var jsonpCallback = 'cb_globalbanner';
+            var timeout = setTimeout(function() {
+                window[jsonpCallback] = function() {};
+                script.parentNode.removeChild(script);
+                reject();
+            }, 10000);
+            
+            window[jsonpCallback] = function(data) {
+                script.parentNode.removeChild(script);
+                window.clearTimeout(timeout);
+                if (!data) {
+                    reject();
+                }
+
+                resolve(data);
+            };
+
+           script.addEventListener('error', function(){
+                window.clearTimeout(timeout);
+                reject();
+           });
+
+            script.src = endpoint + (endpoint.indexOf('?') !== -1 ? '&' : '?') + 'callback=' + jsonpCallback;
+
+            document.head.appendChild(script);
+        });
+    }
+
+    return GetData;
+});
+
+define('CX.Events',['jquery'], function($) {
+    window.cx = window.cx || {};
+    window.cx.eventManager = window.cx.eventManager || $({});
+
+    var eventManager = window.cx.eventManager;
+
+
+
+    window.cx.eventManager.triggerTracked = function(eventName, eventData) {
+        console.log(eventName);
+        eventManager.trigger(eventName);
+        var nr = window.newrelic;
+		if (nr) {
+		  nr.addPageAction(eventName, eventData);
+
+		}
+    };
+
+    return window.cx.eventManager;
+});
+
+define('LoadContent',[
+    'CX.Events',
+    'jquery'
+], function(
+    eventManager,
+    $
+) {
+    /**
+     * LoadGlobalBanner.js
+     * @param {Object} globalBanner
+     * @param {String} content
+     */
+    function LoadContent(element, content, source) {
+        element.innerHTML = content;
+        element.className += ' is-loaded';
+        eventManager.triggerTracked('globalBannerRendered', source);
+    }
+
+    return LoadContent;
+});
+
+define('ElementClassManager',[], function() {
+    /**
+     * DOMElement.js
+     */
+    function ElementClassManager() {}
+
+    /**
+     * check if element has a given class
+     * @param {Object} element
+     * @param {String} element Class to test for
+     */
+    ElementClassManager.prototype.hasClass = function(element, className) {
+        return (' ' + element.className + ' ').indexOf(' ' + className + ' ') > -1;
+    };
+
+    return new ElementClassManager();
+});
+
+define('HoverStates',[
+    'ElementClassManager'
+], function(
+    elementClassManager
+) {
+    /**
+     * HoverStates.js
+     */
+     function HoverStates() {
+         var unitClass = document.getElementsByClassName('unit-message'),
+             css,
+             hover,
+             keyframes,
+             webkit,
+             moz,
+             opera,
+             explorer,
+             crossBrowser,
+             head = document.head || document.getElementsByTagName('head')[0],
+             style = document.createElement('style');
+
+         for (var i = unitClass.length - 1; i >= 0; i--) {
+             var addClass = unitClass[i],
+                 colorPrimary = unitClass[i].getAttribute('data-color-primary'),
+                 colorSecondary = unitClass[i].getAttribute('data-color-secondary'),
+                 defaultColors = {
+                     'background-color': colorSecondary,
+                     'color': colorPrimary,
+                     'border-color': colorPrimary
+                 },
+                 hoverColors = {
+                     'background-color': colorPrimary,
+                     'color': colorSecondary
+                 };
+
+             addClass.className += ' unit-btn_' + i;
+
+             if (elementClassManager.hasClass(addClass, 'unit-btn_reverse') && colorPrimary || colorSecondary === true) {
+                 css = '.global-banner .unit-message.unit-btn_' + i + '.unit-btn_reverse .unit-btn { background-color: ' + colorSecondary + '; border: solid 2px ' + colorPrimary + '; color: ' + colorPrimary + '; }';
+                 hover = '.global-banner .unit-message.unit-btn_' + i + '.unit-btn_reverse .unit-btn:hover {background-color: ' + colorPrimary + '; border: solid 2px ' + colorPrimary + '; color: ' + colorSecondary + ';}';
+                 style.type = 'text/css';
+                 if (style.styleSheet) {
+                     style.styleSheet.cssText = css;
+                 } else {
+                     style.appendChild(document.createTextNode(css + ' ' + hover));
+                 }
+
+             }
+             if (elementClassManager.hasClass(addClass, 'unit-btn_glow') && colorPrimary || colorSecondary === true) {
+                 css = '.global-banner .unit-message.unit-btn_' + i + '.unit-btn_glow .unit-btn { color: ' + colorPrimary + '; border: solid 2px ' + colorPrimary + '; box-shadow: 0 0 7px ' + colorPrimary + '; }';
+                 hover = '.global-banner .unit-message.unit-btn_' + i + '.unit-btn_glow .unit-btn:hover { box-shadow: 0 0 7px ' + colorSecondary + '; animation: shop' + i + ' 2s linear forwards; }';
+                 keyframes = '@keyframes shop' + i + ' { 2% {  border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 3%  { border-color: ' + colorSecondary + ' ; box-shadow:none; } 5% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; }  6% { border-color: ' + colorSecondary + ' box-shadow:none; } 7% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 9%  { border-color: ' + colorSecondary + ' box-shadow:none; } 13% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 16% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 18% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 22% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 34% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 36% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 54% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 100% { border-color: ' + colorPrimary + ' ; box-shadow:0 0 12px -1px ' + colorPrimary + ' inset; } } ';
+                 webkit = '@-webkit-keyframes shop' + i + ' { 2% {  border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 3%  { border-color: ' + colorSecondary + ' ; box-shadow:none; } 5% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; }  6% { border-color: ' + colorSecondary + ' box-shadow:none; } 7% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 9%  { border-color: ' + colorSecondary + ' box-shadow:none; } 13% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 16% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 18% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 22% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 34% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 36% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 54% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 100% { border-color: ' + colorPrimary + ' ; box-shadow:0 0 12px -1px ' + colorPrimary + ' inset; } } ';
+                 moz = '@-moz-keyframes shop' + i + ' { 2% {  border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 3%  { border-color: ' + colorSecondary + ' ; box-shadow:none; } 5% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; }  6% { border-color: ' + colorSecondary + ' box-shadow:none; } 7% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 9%  { border-color: ' + colorSecondary + ' box-shadow:none; } 13% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 16% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 18% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 22% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 34% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 36% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 54% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 100% { border-color: ' + colorPrimary + ' ; box-shadow:0 0 12px -1px ' + colorPrimary + ' inset; } } ';
+                 opera = '@-o-keyframes shop' + i + ' { 2% {  border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 3%  { border-color: ' + colorSecondary + ' ; box-shadow:none; } 5% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; }  6% { border-color: ' + colorSecondary + ' box-shadow:none; } 7% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 9%  { border-color: ' + colorSecondary + ' box-shadow:none; } 13% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 16% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 18% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 22% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 34% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 36% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 54% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 100% { border-color: ' + colorPrimary + ' ; box-shadow:0 0 12px -1px ' + colorPrimary + ' inset; } } ';
+                 explorer = '@-ms-keyframes shop' + i + ' { 2% {  border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 3%  { border-color: ' + colorSecondary + ' ; box-shadow:none; } 5% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; }  6% { border-color: ' + colorSecondary + ' box-shadow:none; } 7% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 9%  { border-color: ' + colorSecondary + ' box-shadow:none; } 13% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 16% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 18% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 22% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 34% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 36% { border-color: ' + colorSecondary + ' ; box-shadow:none; } 54% { border-color: ' + colorPrimary + ' ; box-shadow: 0 0 12px -1px ' + colorPrimary + ' inset; } 100% { border-color: ' + colorPrimary + ' ; box-shadow:0 0 12px -1px ' + colorPrimary + ' inset; } } ';
+                 crossBrowser = keyframes + webkit + moz + opera + explorer;
+
+                 style.type = 'text/css';
+                 if (style.styleSheet) {
+                     style.styleSheet.cssText = css;
+                 } else {
+                     style.appendChild(document.createTextNode(css + ' ' + hover + ' ' + crossBrowser));
+                 }
+
+             }
+             if (elementClassManager.hasClass(addClass, 'unit-btn_fade') && colorPrimary || elementClassManager.hasClass(addClass, 'unit-btn_copyfade') && colorPrimary) {
+                 css = '.global-banner .unit-message.unit-btn_' + i + ' .unit-btn {background: none; border: solid 2px ' + colorPrimary + '; color: ' + colorPrimary + '; }';
+                 if (style.styleSheet) {
+                     style.styleSheet.cssText = css;
+                 } else {
+                     style.appendChild(document.createTextNode(css));
+                 }
+             }
+         }
+
+         head.appendChild(style);
+     }
+
+    return HoverStates;
+});
+
+require([
+    'Global.Banner.Config',
+    'Storage',
+    'GetData',
+    'LoadContent',
+    'HoverStates',
+    'CX.Events',
+    'jquery'
+], function(
+    config,
+    storage,
+    getData,
+    loadContent,
+    hoverStates,
+    eventManager,
+    $
+) {
+    var storageExists = storage.available('storage');
+    var storedBanner = {
+        expiry: 0,
+        content: null
+    };
+    var apiBanner;
+
+    if (storageExists) {
+        storedBanner = storage.get(config.storage) || storedBanner;
+    }
+
+    getData(config.endpoint).then(function(data) {
+        if (data) {
+            apiBanner = data.content;
+            if (storageExists) {
+                storage.set(config.storage, {
+                    expiry: new Date().getTime(),
+                    content: apiBanner
+                });
+            }
+        }
+        eventManager.triggerTracked('globalBannerApiComplete');
+    }).catch(function(){
+        eventManager.triggerTracked('globalBannerApiError');
+    });
+
+    eventManager.on('globalBannerInDOM', function() {
+        var globalBanner = document.getElementById('divGlobalBanner');
+        // if (config.endpoint) {
+
+        // }
+        if (storedBanner.content && (new Date().getTime() - storedBanner.expiry) < 300000) {
+            loadContent(globalBanner, storedBanner.content, { source: 'localStorage' });
+            hoverStates();
+        } else {
+            if (apiBanner) {
+                loadContent(globalBanner, apiBanner, { source: 'API' });
+                hoverStates();
+            } else {
+                setTimeout(function() {
+                    var preloader = document.createElement('div');
+                    preloader.className = 'js-preloader';
+
+                    if (!globalBanner.innerHTML.trim()) {
+                        globalBanner.appendChild(preloader);
+                    }
+                }, 250);
+                eventManager.on('globalBannerApiComplete', function() {
+                    if (apiBanner) {
+                        loadContent(globalBanner, apiBanner, { source: 'API' });
+                        hoverStates();
+                    } else {
+                        globalBanner.parentNode.removeChild(globalBanner);
+                    }
+                });
+                eventManager.on('globalBannerApiError', function() {
+                    globalBanner.parentNode.removeChild(globalBanner);
+                });
+            }
+        }
+    });
+});
+
+define("global-banner-sdk", function(){});
+

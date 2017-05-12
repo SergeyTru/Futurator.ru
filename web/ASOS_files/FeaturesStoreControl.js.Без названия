@@ -1,0 +1,35 @@
+define('FeaturesStoreControl', function() {
+    // Use lower case stores!
+    return {
+        M5: {
+            "au": true,
+            "ru": true,
+            "com": true,
+            "de": true,
+            "it": true,
+            "us": true,
+            "fr": true,
+            "es": true
+        },
+        Id2: {
+            "au": true,
+            "ru": true,
+            "com": true,
+            "de": true,
+            "it": true,
+            "us": true,
+            "fr": true,
+            "es": true
+        },
+        GiftListShare: {
+            "au": false,
+            "ru": true,
+            "com": true,
+            "de": true,
+            "it": true,
+            "us": true,
+            "fr": true,
+            "es": true
+        }
+    }
+});

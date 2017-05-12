@@ -1,0 +1,26 @@
+(function(){
+
+        if(navigator.userAgent.toLowerCase().indexOf('chrome') > -1){
+            $( document ).ready(function() {
+            
+                $("body").append("<style>.quickview-container #js-video-player object, .quickview-container #divFlash.video360 object, #quickViewPopup #play-js-video-player{width:500px !important;height:500px !important;visibility:hidden !important;}");
+                    $(".three-sixty, .catwalk").click(function(){
+                        setTimeout(function(){
+                            $("#play-js-video-player").attr("style","visibility: visible !important; height:100% !important; width:100% !important");
+                        }, 300);
+                    });
+
+
+
+                $(".video-control-wrapper .show-video.replace.shoes").click(function(){
+                    $("#dummyFlash").remove();
+                    var obj1 = $("#divFlash object").attr("data");
+                        obj1 = '<object type="application/x-shockwave-flash" data="'+obj1+'" width="500" height="500" id="dummyFlash" style="visibility: none !important;"></object>';
+                       $("body").append(obj1) ;
+
+                });
+            });
+
+        };
+
+})();
