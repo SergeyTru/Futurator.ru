@@ -97,27 +97,29 @@
         var text = templateForUris(new URI(item1), new URI(item2));
         if (isUser) {
           insertCell(2, text, addDebuger = true);
-          insertCell(3, text.toRegexp());
+          insertCell(3, text === undefined ? "none" : text.toRegexp());
         }
         else {
           ++totalTests;
           if (String(text).toUpperCase() === String(expected).toUpperCase()) {
             insertCell(2, text, addDebuger = true);
             newRow.className = "success";
-            var success = true;
-            var expr = '^' + text.toRegexp() + "$";
-            if (!item1.match(expr)) {
-              cell0.className = "failed";
-              cell0.title = expr;
-              success = false;
+            if (text !== undefined) {
+              var success = true;
+              var expr = '^' + text.toRegexp() + "$";
+              if (!item1.match(expr)) {
+                cell0.className = "failed";
+                cell0.title = expr;
+                success = false;
+              }
+              if (!item2.match(expr)) {
+                cell1.className = "failed";
+                cell1.title = expr;
+                success = false;
+              }
+              if (success)
+                ++successTests;
             }
-            if (!item2.match(expr)) {
-              cell1.className = "failed";
-              cell1.title = expr;
-              success = false;
-            }
-            if (success)
-              ++successTests;
           }
           else {
             insertCell(2, text, addDebuger = true);
@@ -128,6 +130,7 @@
       catch (err) {
         insertCell(2, err);
         newRow.className = "failed";
+        console.error(err);
       }
       if (!isUser)
         insertCell(3, expected);
@@ -183,12 +186,24 @@
     printResult("http://bash.im?our+price=10+cents", "http://bash.im?our+price=15+dollars", "http://bash.im?our+price={T}");
 
     startSection("Subdomains");
-    printResult("http://cdn7.bash.im", "http://cdn7.bash.im", "http://cdn7.bash.im");
+    printResult("http://cdn7.bash.im", "http://cdn7.bash.im", "undefined");
     printResult("http://cdn2.bash.im", "http://cdn23.bash.im", "http://cdn{N}.bash.im");
     printResult("http://cdn137.bash.im", "http://cdn777.bash.im", "http://cdn{N}.bash.im");
     printResult("http://cdn23.bash.im", "http://cdn7.bash.im", "http://cdn{N}.bash.im");
     printResult("http://cdnla.bash.im", "http://cdkne.bash.im", "http://{T}.bash.im");
     printResult("http://cdn-la.bash.im", "http://cdn-ne.bash.im", "http://cdn-{T}.bash.im");
+
+    startSection("NewTests");
+    printResult("http://site.ru/?query1", "http://othersite.ru/?query2", undefined);
+    printResult("http://bash.im/item1", "http://bash.im/AAAA", "http://bash.im/{T}");
+    printResult("http://bash.im/item1", "http://bash.im/1111", "http://bash.im/{T}");	
+    printResult("http://bash.im/item1.php", "http://bash.im/1111.php", "http://bash.im/{T}.php");	
+    printResult("http://bash.im/11111.php", "http://bash.im/item1.php", "http://bash.im/{T}.php");	
+    printResult("http://bash.im/item1", "http://bash.im/", undefined);
+    printResult("http://bash.im/item1", "http://bash.im", undefined);
+    printResult("http://bash.im/", "http://bash.im/", undefined);
+    printResult("http://bash.im/", "http://bash.im", undefined);
+    printResult("http://bash.im", "http://bash.im",  undefined);
 
     document.getElementById('statistic').innerText =
       "" + totalTests + " tests runned, " + successTests + " is success, " + (totalTests - successTests) + " failed";

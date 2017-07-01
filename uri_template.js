@@ -204,13 +204,18 @@ var templateForUris = function(url1, url2) {
   else
     return;
 
-  if (textEqualsNoCase(auth1, auth2))
+  var urlsIsSame = true;
+  if (textEqualsNoCase(auth1, auth2)) {
     auth = url1.getAuthority()
-  else
+  } else {
     auth = (function(auth1, auth2) {
       var ps1 = auth1.indexOf('.');
       var ps2 = auth2.indexOf('.');
-      if (!textEqualsNoCase(auth1.slice(ps1), auth2.slice(ps2)))
+      var substr1 = auth1.slice(ps1);
+      var substr2 = auth2.slice(ps2);
+      //allow subdomain variations (like cdn), but 2nd level domain should be the same
+      if (!textEqualsNoCase(substr1, substr2) || 
+          substr1.lastIndexOf('.') <= 0 || substr2.lastIndexOf('.') <= 0)
         return;
 
       var result = templateForTextPart(auth1.slice(0, ps1), auth2.slice(0, ps2));
@@ -218,12 +223,14 @@ var templateForUris = function(url1, url2) {
         result = result.join("");
       return result + auth1.slice(ps1);
     })(url1.getAuthority(), url2.getAuthority());
+    urlsIsSame = false;
+  }
   if (auth === undefined)
     return;
   var query;
-  if (textEqualsNoCase(url1.getQuery(), url2.getQuery()))
+  if (textEqualsNoCase(url1.getQuery(), url2.getQuery())) {
     query = url1.getQuery()
-  else
+  } else {
     query = (function(query1, query2) {
       if (query1 == null && query2 == null)
         return query1;
@@ -258,18 +265,31 @@ var templateForUris = function(url1, url2) {
       if (result.length > 1)
         return result.slice(1);
     })(url1.getQuery(), url2.getQuery());
+    urlsIsSame = false;
+  }
   if (query === undefined)
     return;
 
   var path1 = url1.getPath();
   var path2 = url2.getPath();
-  if (path1 === null && path2 === null || textEqualsNoCase(path1, path2))
-    return new UriTemplate(url1.getScheme(), auth, path1, query);
+  if (path1 === null)
+    path1 = '/';
+  if (path2 === null)
+    path2 = '/';
+  if (textEqualsNoCase(path1, path2)) {
+    if (urlsIsSame)
+      return undefined;
+    else
+      return new UriTemplate(url1.getScheme(), auth, url1.getPath(), query);
+  }
 
   function reversedPathParts(path) {
     if (path.indexOf('{/}') >= 0)
       throw "not implemented for templates"; //invalid path?
-    return path.match(/[^\/]+/g).reverse();
+    if (path !== null)
+      return (path.match(/[^\/]+/g) || []).reverse();
+    else
+      return [];
   }
 
   var handleVaryPathPart = function(center1, center2) {
