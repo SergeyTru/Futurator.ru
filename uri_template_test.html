@@ -166,44 +166,44 @@
     }    
 
     startSection("Path");
-    printResult("http://bash.im/item-1.html", "http://bash.im/item-2.html", "http://bash.im/item-{N}.html");
-    printResult("http://bash.im/item1", "http://bash.im/item2", "http://bash.im/item{N}");
-    printResult("http://bash.im/tv.html", "http://bash.im/music.html", "http://bash.im/{T}.html");
-    printResult("http://bash.im/tv/sony", "http://bash.im/music/", "http://bash.im{/}");
-    printResult("http://kotofoto.ru/shop/CID_69_3_sotovyie_telefonyi.html", "http://kotofoto.ru/shop/CID_462_2_internet_planshet.html", "http://kotofoto.ru/shop/CID_{N}_{N}_{T}.html");
-    printResult("http://www.kupikupon.ru/deals/youmagic_46479", "http://www.kupikupon.ru/deals/expert_52113", "http://www.kupikupon.ru/deals/{T}_{N}");
-    printResult("http://www.afisha.ru/msk/shop/10", "http://www.afisha.ru/msk/cafe", "http://www.afisha.ru/msk{/}");
-    printResult("http://www.afisha.ru/msk/shop/10", "http://www.afisha.ru/msk/shop/1", "http://www.afisha.ru/msk/shop/{N}");
-    printResult("http://bonusman.ru/actions/3-fhdsjfhd.html", "http://bonusman.ru/actions/5-jjkds.html", "http://bonusman.ru/actions/{N}-{T}.html");
-    printResult("http://vigoda.ru/woman/offer/42305/Отдых", "http://vigoda.ru/woman/offer/41312/Райский", "http://vigoda.ru/woman/offer/{N}/{T}");
-    printResult("http://bash.im/3_dogs_at_roof", "http://bash.im/15_dogs_on_roof", "http://bash.im/{N}_dogs_{T}_roof");
-    printResult("http://bash.im/15_30_mama", "http://bash.im/16_40_papa", "http://bash.im/{N}_{N}_{T}");
+    printResult("http://example.org/item-1.html", "http://example.org/item-2.html", "http://example.org/item-{N}.html");
+    printResult("http://example.org/item1", "http://example.org/item2", "http://example.org/item{N}");
+    printResult("http://example.org/tv.html", "http://example.org/music.html", "http://example.org/{T}.html");
+    printResult("http://example.org/tv/sony", "http://example.org/music/", "http://example.org{/}");
+    printResult("http://www.example.org/shop/CID_69_3_sotovyie_telefonyi.html", "http://www.example.org/shop/CID_462_2_internet_planshet.html", "http://www.example.org/shop/CID_{N}_{N}_{T}.html");
+    printResult("http://www.example.org/deals/youmagic_46479", "http://www.example.org/deals/expert_52113", "http://www.example.org/deals/{T}_{N}");
+    printResult("http://www.example.org/msk/shop/10", "http://www.example.org/msk/cafe", "http://www.example.org/msk{/}");
+    printResult("http://www.example.org/msk/shop/10", "http://www.example.org/msk/shop/1", "http://www.example.org/msk/shop/{N}");
+    printResult("http://www.example.org/actions/3-fhdsjfhd.html", "http://www.example.org/actions/5-jjkds.html", "http://www.example.org/actions/{N}-{T}.html");
+    printResult("http://www.example.org/woman/offer/42305/Отдых", "http://www.example.org/woman/offer/41312/Райский", "http://www.example.org/woman/offer/{N}/{T}");
+    printResult("http://example.org/3_dogs_at_roof", "http://example.org/15_dogs_on_roof", "http://example.org/{N}_dogs_{T}_roof");
+    printResult("http://example.org/15_30_mama", "http://example.org/16_40_papa", "http://example.org/{N}_{N}_{T}");
 
     startSection("Query");
-    printResult("http://bash.im?par1=a&par2=c", "http://bash.im?par1=b&par2=c", "http://bash.im?par1={T}&par2=c");
-    printResult("http://bash.im?par=a&par=c", "http://bash.im?par=b&par=c", "http://bash.im?par=c&par={T}");
-    printResult("http://bash.im?par=1", "http://bash.im?par=2&any=c&beny=34", "http://bash.im?par={N}&{*}");
-    printResult("http://bash.im?our+price=10+cents", "http://bash.im?our+price=15+dollars", "http://bash.im?our+price={T}");
+    printResult("http://example.org?par1=a&par2=c", "http://example.org?par1=b&par2=c", "http://example.org?par1={T}&par2=c");
+    printResult("http://example.org?par=a&par=c", "http://example.org?par=b&par=c", "http://example.org?par=c&par={T}");
+    printResult("http://example.org?par=1", "http://example.org?par=2&any=c&beny=34", "http://example.org?par={N}&{*}");
+    printResult("http://example.org?our+price=10+cents", "http://example.org?our+price=15+dollars", "http://example.org?our+price={T}");
 
     startSection("Subdomains");
-    printResult("http://cdn7.bash.im", "http://cdn7.bash.im", "undefined");
-    printResult("http://cdn2.bash.im", "http://cdn23.bash.im", "http://cdn{N}.bash.im");
-    printResult("http://cdn137.bash.im", "http://cdn777.bash.im", "http://cdn{N}.bash.im");
-    printResult("http://cdn23.bash.im", "http://cdn7.bash.im", "http://cdn{N}.bash.im");
-    printResult("http://cdnla.bash.im", "http://cdkne.bash.im", "http://{T}.bash.im");
-    printResult("http://cdn-la.bash.im", "http://cdn-ne.bash.im", "http://cdn-{T}.bash.im");
+    printResult("http://cdn7.example.org", "http://cdn7.example.org", "undefined");
+    printResult("http://cdn2.example.org", "http://cdn23.example.org", "http://cdn{N}.example.org");
+    printResult("http://cdn137.example.org", "http://cdn777.example.org", "http://cdn{N}.example.org");
+    printResult("http://cdn23.example.org", "http://cdn7.example.org", "http://cdn{N}.example.org");
+    printResult("http://cdnla.example.org", "http://cdkne.example.org", "http://{T}.example.org");
+    printResult("http://cdn-la.example.org", "http://cdn-ne.example.org", "http://cdn-{T}.example.org");
 
     startSection("NewTests");
-    printResult("http://site.ru/?query1", "http://othersite.ru/?query2", undefined);
-    printResult("http://bash.im/item1", "http://bash.im/AAAA", "http://bash.im/{T}");
-    printResult("http://bash.im/item1", "http://bash.im/1111", "http://bash.im/{T}");	
-    printResult("http://bash.im/item1.php", "http://bash.im/1111.php", "http://bash.im/{T}.php");	
-    printResult("http://bash.im/11111.php", "http://bash.im/item1.php", "http://bash.im/{T}.php");	
-    printResult("http://bash.im/item1", "http://bash.im/", undefined);
-    printResult("http://bash.im/item1", "http://bash.im", undefined);
-    printResult("http://bash.im/", "http://bash.im/", undefined);
-    printResult("http://bash.im/", "http://bash.im", undefined);
-    printResult("http://bash.im", "http://bash.im",  undefined);
+    printResult("http://www.example.org/?query1", "http://www.example.com/?query2", undefined);
+    printResult("http://example.org/item1", "http://example.org/AAAA", "http://example.org/{T}");
+    printResult("http://example.org/item1", "http://example.org/1111", "http://example.org/{T}");	
+    printResult("http://example.org/item1.php", "http://example.org/1111.php", "http://example.org/{T}.php");	
+    printResult("http://example.org/11111.php", "http://example.org/item1.php", "http://example.org/{T}.php");	
+    printResult("http://example.org/item1", "http://example.org/", undefined);
+    printResult("http://example.org/item1", "http://example.org", undefined);
+    printResult("http://example.org/", "http://example.org/", undefined);
+    printResult("http://example.org/", "http://example.org", undefined);
+    printResult("http://example.org", "http://example.org",  undefined);
 
     document.getElementById('statistic').innerText =
       "" + totalTests + " tests runned, " + successTests + " is success, " + (totalTests - successTests) + " failed";
@@ -212,8 +212,8 @@
     </script>
     <br>
     <form id="calc">
-      <input id="url1" placeholder="url 1" value="http://cdn2.bash.im"/>
-      <input id="url2" placeholder="url 2" value="http://cdn23.bash.im"/>
+      <input id="url1" placeholder="url 1" value="http://cdn2.example.org"/>
+      <input id="url2" placeholder="url 2" value="http://cdn23.example.org"/>
       <button type="button" onclick="Calculate()">Make template</button>
       <p id="result"/>
     </form>
