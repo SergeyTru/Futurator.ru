@@ -154,7 +154,7 @@ var templateForUris = function(url1, url2) {
       var curStart = 0;
       var curClass = classFor(path.charAt(0));
       for (var i = 1; i < path.length; ++i) {
-        if (curClass(path.charAt(i)))
+        if (curClass !== isDivider && curClass(path.charAt(i)))
           continue;
         result.push(path.slice(curStart, i));
         curStart = i;
@@ -168,6 +168,7 @@ var templateForUris = function(url1, url2) {
 
     function joinTextParts(parts1, parts2) {
       var result = [];
+      var actualLen = 0;
       var minLen = Math.min(parts1.length, parts2.length);
       for (var i = 0; i < minLen; ++i) {
         var p1 = parts1[i];
@@ -179,6 +180,7 @@ var templateForUris = function(url1, url2) {
         if (cl === isDivider ||
           p1.toUpperCase() === p2.toUpperCase()) {
           result.push(p1);
+          actualLen = result.length;
         }
         else if (cl === isNumber)
           result.push("{N}");
@@ -187,7 +189,12 @@ var templateForUris = function(url1, url2) {
         else
           throw "Unknown class";
       }
-      return {result: result, handled: i, hasUnhandled: i < parts1.length || i < parts2.length};
+      var hasUnhandled = i < parts1.length || i < parts2.length;
+      if (hasUnhandled) {
+        result = result.slice(0, actualLen);
+        i = actualLen;
+      }
+      return {result: result, handled: i, hasUnhandled: hasUnhandled};
     }
 
     return merge(part1, part2, splitTextPart, joinTextParts,

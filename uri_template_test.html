@@ -199,6 +199,7 @@
     printResult("http://example.org/item1", "http://example.org/1111", "http://example.org/{T}");	
     printResult("http://example.org/item1.php", "http://example.org/1111.php", "http://example.org/{T}.php");	
     printResult("http://example.org/11111.php", "http://example.org/item1.php", "http://example.org/{T}.php");	
+    printResult("http://example.org/asdf-.php", "http://example.org/pqbn.php", "http://example.org/{T}.php");	
     printResult("http://example.org/item1", "http://example.org/", undefined);
     printResult("http://example.org/item1", "http://example.org", undefined);
     printResult("http://example.org/", "http://example.org/", undefined);
