@@ -40,12 +40,12 @@ UriTemplate.prototype.toString = function() {
 
 UriTemplate.prototype.toRegexp = function() {
   //regexp is not fully functional: js regexp does not handle unicode
-  var replacer = function(match, p1) {
+  var replacer = function(match, p1, p2) {
     p1 = p1.toUpperCase();
     if (p1 === 'N')
       return "\\d+";
     if (p1 === 'T')
-      return "[\\w\\+А-Яа-я]+";
+      return "[\\w\\+А-Яа-я" + p2 + "]+";
     if (p1 === '/')
       return "[\\wА-Яа-я/]+";
     if (p1 === '*')
@@ -55,7 +55,7 @@ UriTemplate.prototype.toRegexp = function() {
 
   var result = this.toString()
     .replace(/[.+?^$()|[\]\\]/g, "\\$&")
-    .replace(/{(.)}/g, replacer);
+    .replace(/{(.)([-_]*)}/g, replacer);
   var idx = result.indexOf('?');
   if (idx >= 0)
     return result.slice(0, idx+1) + '(&?' + result.slice(idx+1).split('&').join("|&?") + ')+';
@@ -111,6 +111,23 @@ var templateForUris = function(url1, url2) {
     var res1 = cond(val1);
     var res2 = cond(val2);
     return (res1 && res2)? forTrue : (res1 || res2)? undefined : forFalse;
+  }
+
+  function generateVaryText(parts1, parts2) {
+    let hasSub = false;
+    let hasSlash = false;
+    parts1.concat(parts2).forEach(function(part) {
+      if (part.includes("-"))
+        hasSlash = true;
+      if (part.includes("_"))
+        hasSub = true;
+    });
+    let result = "{T";
+    if (hasSub)
+      result += "_";
+    if (hasSlash)
+      result += "-";
+    return result + "}";
   }
 
   //init function should give us reversed array
@@ -198,7 +215,7 @@ var templateForUris = function(url1, url2) {
     }
 
     return merge(part1, part2, splitTextPart, joinTextParts,
-      (x, y) => sameForBoth(x, y, item => item.length > 0, ["{T}"], []))
+      (x, y) => sameForBoth(x, y, item => item.length > 0, [generateVaryText(x, y)], []))
   }
 
   var auth1 = url1.getAuthority();
@@ -300,7 +317,7 @@ var templateForUris = function(url1, url2) {
   }
 
   var handleVaryPathPart = function(center1, center2) {
-    return sameForBoth(center1, center2, x => x.length > 0, ['{/}'], ['{T}']);
+    return sameForBoth(center1, center2, x => x.length > 0, ['{/}'], [generateVaryText(center1, center2)]);
   }
 
   function templateForPathPart(parts1, parts2) {

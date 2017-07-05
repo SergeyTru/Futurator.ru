@@ -170,7 +170,7 @@
     printResult("http://example.org/item1", "http://example.org/item2", "http://example.org/item{N}");
     printResult("http://example.org/tv.html", "http://example.org/music.html", "http://example.org/{T}.html");
     printResult("http://example.org/tv/sony", "http://example.org/music/", "http://example.org{/}");
-    printResult("http://www.example.org/shop/CID_69_3_sotovyie_telefonyi.html", "http://www.example.org/shop/CID_462_2_internet_planshet.html", "http://www.example.org/shop/CID_{N}_{N}_{T}.html");
+    printResult("http://www.example.org/shop/CID_69_3_sotovyie_telefonyi.html", "http://www.example.org/shop/CID_462_2_internet_planshet.html", "http://www.example.org/shop/CID_{N}_{N}_{T_}.html");
     printResult("http://www.example.org/deals/youmagic_46479", "http://www.example.org/deals/expert_52113", "http://www.example.org/deals/{T}_{N}");
     printResult("http://www.example.org/msk/shop/10", "http://www.example.org/msk/cafe", "http://www.example.org/msk{/}");
     printResult("http://www.example.org/msk/shop/10", "http://www.example.org/msk/shop/1", "http://www.example.org/msk/shop/{N}");
@@ -178,6 +178,9 @@
     printResult("http://www.example.org/woman/offer/42305/Отдых", "http://www.example.org/woman/offer/41312/Райский", "http://www.example.org/woman/offer/{N}/{T}");
     printResult("http://example.org/3_dogs_at_roof", "http://example.org/15_dogs_on_roof", "http://example.org/{N}_dogs_{T}_roof");
     printResult("http://example.org/15_30_mama", "http://example.org/16_40_papa", "http://example.org/{N}_{N}_{T}");
+    printResult("http://example.org/15_30", "http://example.org/16_40", "http://example.org/{N}_{N}");
+    printResult("http://example.org/some_thing_with_subs/page", "http://example.org/another_subst/page", "http://example.org/{T_}/page");
+    printResult("http://example.org/some-thing-with-slash/page", "http://example.org/another-slashy/page", "http://example.org/{T-}/page");
 
     startSection("Query");
     printResult("http://example.org?par1=a&par2=c", "http://example.org?par1=b&par2=c", "http://example.org?par1={T}&par2=c");
@@ -199,7 +202,7 @@
     printResult("http://example.org/item1", "http://example.org/1111", "http://example.org/{T}");	
     printResult("http://example.org/item1.php", "http://example.org/1111.php", "http://example.org/{T}.php");	
     printResult("http://example.org/11111.php", "http://example.org/item1.php", "http://example.org/{T}.php");	
-    printResult("http://example.org/asdf-.php", "http://example.org/pqbn.php", "http://example.org/{T}.php");	
+    printResult("http://example.org/asdf-.php", "http://example.org/pqbn.php", "http://example.org/{T-}.php");	
     printResult("http://example.org/item1", "http://example.org/", undefined);
     printResult("http://example.org/item1", "http://example.org", undefined);
     printResult("http://example.org/", "http://example.org/", undefined);
