@@ -114,6 +114,8 @@ function getUrlWithoutHash(href) {
 */
 console.log("*************** FTN START **************");
 var groups = getPathAndUrlsArrayfromAnchors();
+var groupsArray=[];
+
 
 //debugNbeautifyPathsWithClustersColors(groups); 
 //groups=groups.splice(0,1);
@@ -221,7 +223,7 @@ function generateCardNodesList(groupList) {
             if(!nodeInList(node,cardNodesListByCard[cardID])) {    
                 cardNodesListByCard[cardID].push(node);
             } else {
-                console.log("Node already here");
+               // console.log("Node already here");
             }
 
 
@@ -385,10 +387,14 @@ function debugNbeautifyPathsWithClusters(pathsWithClusters) {
 }
 
 
+
+
 function setCards(groups) {
     groups.forEach((group, pos) => {
+        groupsArray[pos]={"nodes":[]};
+
 		//if(pos==56 || pos==54 || pos==55 || pos==56 || pos==57) { 
-        if(pos!=57) {             
+        //if(pos!=57) {             
             //Работаю с карточками, мы изменяем их и уже в изменённых местах (нодах), так что если одна ссылка оказывается в другой группе - она перезаписывается
             /*
             Проблема в том, что в идеале - в каждой группе хранится независимая копия ноды
@@ -398,11 +404,11 @@ function setCards(groups) {
 
             
             */
-        //if(1) {
+        if(1) {
 		
-			findCardsSingle(group);
+			findCardsSingle(group,pos);
 
-			composeCardSingle(group);
+			composeCardSingle(group,pos);
 
 			cardEl(group,pos);        
 		}
@@ -427,24 +433,30 @@ function findCard(nodeMain,node2) {//check if nodeMain===node2 before launch
 
 
 
-function findCardsSingle(obj) {
+function findCardsSingle(obj,pos) {
     if(obj.nodes.length<2) 
         return false;
     var saveNodes=[];
     obj.nodes.forEach((nodeMain,i) => {
+        
+        
         saveNodes.push(nodeMain);
+        pseudoNode={"Card":[]};
         nodeMain.Card=[];        
         obj.nodes.forEach((node2,j) => {
             if((saveNodes.indexOf(node2)==-1))
             {
                 comonCard=findCard(nodeMain,node2);
-                if(comonCard)							
+                if(comonCard) {							
                     nodeMain.Card.push(comonCard);
+                    pseudoNode.Card.push(comonCard);
+                }
                 else {
-                    log("failed Card search for nodes");
+                    console.log("failed Card search for nodes");
                 }
             }
         });	
+        groupsArray[pos].nodes.push(pseudoNode);
     });
 	
 }
@@ -452,7 +464,7 @@ function findCardsSingle(obj) {
 
 
 
-function composeCardSingle(group) {
+function composeCardSingle(group,pos) {
 
     if(group.nodes.length> 1)
     {
@@ -480,7 +492,9 @@ function composeCardSingle(group) {
         });	
     } else {
         group.pathToCard=getDomPath(group.nodes[0].parentNode);
+        
     }
+    groupsArray[pos].pathToCard=group.pathToCard;    
 
 }
 
@@ -507,7 +521,7 @@ function cardEl(group,pos) {
        //node=node.cloneNode(); //trying to serve connection here
 
         node.cardNode=cardNode;
-       
+        groupsArray[pos].nodes[index].cardNode=cardNode;
         node.cardNode.id = "cardId_"+pos+"_"+index;  
 		node.cardNode.className+= " card_class_group_"+pos;  
         node.cardNode.style.border="6px dashed #CC0";
