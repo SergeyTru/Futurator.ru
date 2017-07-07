@@ -132,14 +132,20 @@ setCards(groups);
 
 console.log(groups);
 
-//compareCards(groups[4],groups[6]);
+//console.log(compareCards(groups[55],groups[56]));
+
+/*
 function compareCards(groupA,groupB) {
     var equality=false;
-    groupA.nodes.forEach(function(nodeA) {
-        groupB.nodes.forEach(function(nodeB) {
+    var i=0;
+    var j=0;
+    groupsArray[groupA.pos].nodes.forEach(function(nodeA) {
+        i++;
+        groupsArray[groupB.pos].nodes.forEach(function(nodeB) {
+            j++;
             if(nodeA.cardNode==nodeB.cardNode) 
             {
-                //console.log("Card node equality");
+                console.log("Card node equality");
                 //console.log(nodeA.cardNode);
                 //return nodeA.cardNode; //aka true                
                 equality=true;
@@ -148,10 +154,22 @@ function compareCards(groupA,groupB) {
         }, this);
 
     }, this);
-
+    console.log(i+" / "+j);
     return equality;
 
 }
+*/
+
+//В идеале, карточка внутри группы одна, но даже если есть хоть одна 
+//- всё равно карточки групп равны
+function compareCards(groupA,groupB) {
+    return groupsArray[groupA.pos].nodes.some(nodeA=>{
+        return groupsArray[groupB.pos].nodes.some(nodeB=>{
+            return nodeA.cardNode==nodeB.cardNode;
+        });
+    });
+}
+
 
 //Hip1 - we can use pathToCard to sort groups by Card
 //Failed - there are too many equal strings pathToCard which are separate cards
@@ -173,7 +191,7 @@ function getGroupsByCard(groupList) {
 
 
 //Hip2 - if even one Card from each group has CardNodeEquality this can be CardGroup (with longest group as seed)
-generateCardNodesList(groups);
+//generateCardNodesList(groups);
 
 function generateCardNodesList(groupList) {
     var cardNodesListArray=[];
@@ -192,11 +210,23 @@ function generateCardNodesList(groupList) {
 
             //console.log(indexA+"/"+indexB); //- all with all visial test
             var hasSameCards=compareCards(groupA,groupB);
-            if(hasSameCards) {
-                groupA.nodes.forEach(function(nodeA) {
-                    groupB.nodes.forEach(function(nodeB) {
-                        if(nodeA.cardNode==nodeB.cardNode)  // && nodeA!=nodeB
+            
+            if(hasSameCards) {                
+                console.log("GROUP A("+indexA+") AND GROUP B("+indexB+") have same card");
+                groupsArray[groupA.pos].nodes.forEach(function(nodeA,indexA) {
+                    groupsArray[groupB.pos].nodes.forEach(function(nodeB,indexB) {
+                        if(nodeA.cardNode==nodeB.cardNode )  // && nodeA!=nodeB 
+                        //- мы говорим о том, что у обоих нод (из разных групп) одна и та же карта. Их надо объединить под этой карточкой, но это мы сделаем потом
                         {
+                            //adding node info to our table
+                            tmpNodeA=nodeA;
+                            tmpNodeB=nodeB;
+                            
+                            nodeA=groups[groupA.pos].nodes[indexA];
+                            nodeB=groups[groupB.pos].nodes[indexB];
+                            nodeA.cardNode=tmpNodeA.cardNode;
+                            nodeB.cardNode=tmpNodeB.cardNode;
+
                             cardNodesListArray[newCardNodeNumber].push(nodeA);
                             cardNodesListArray[newCardNodeNumber].push(nodeB);
                         }
@@ -210,12 +240,63 @@ function generateCardNodesList(groupList) {
     }, this);
 
     console.log(cardNodesListArray);
-
+    
     //store by card
     var cardNodesListByCard=[];
+    /*
+        [
+            {
+                "cardNode":cardNode,
+                "nodesInCard":[
+                    node1,
+                    node2,
+                    ...
+                    nodeN
+                ]
+
+
+            }
+        ]
+    */
+    cardNodesListArray.forEach(function(cardNodesList) {
+        cardNodesList.forEach(function(node) {
+            var curCardNode=node.cardNode;
+            var trueIndex=false;
+
+            cardNodesListByCard.forEach((CardGlobalEl,index)=>{
+                if(CardGlobalEl.cardNode==curCardNode)
+                    trueIndex=index;
+            });
+                        
+            
+
+            if(trueIndex===false) { //no element with such node
+                tmpGlobalCardEl={
+                "cardNode":curCardNode,
+                "nodesInCard":[]
+                };
+                tmpGlobalCardEl.nodesInCard.push(node); //Нода не настоящая!
+            
+                cardNodesListByCard.push(tmpGlobalCardEl);
+            } else {
+                var isNodeSaved=cardNodesListByCard[trueIndex].nodesInCard.some(savedNode=>{
+                    return savedNode===node;
+                });
+                if(!isNodeSaved)
+                    cardNodesListByCard[trueIndex].nodesInCard.push(node); //Нода не настоящая!
+            }
+
+
+
+        }, this);
+    }, this);
+
+
+
+/*
     cardNodesListArray.forEach(function(cardNodesList) {
             cardNodesList.forEach(function(node) {                
-            var cardID=node.cardNode.id;
+            var cardID=node.cardNode.id; //у нас больше нет ID у карточки. Надо придумать как её сделать.
 
             if(!cardNodesListByCard[cardID])
                 cardNodesListByCard[cardID]=[];
@@ -230,6 +311,7 @@ function generateCardNodesList(groupList) {
             }, this);
             
     }, this);
+    */
 
 
 
@@ -255,7 +337,12 @@ function nodeInList(node,nodeList) {
     return result;
 }
 
-//var byCards=getGroupsByCard(groups);
+var byCards=generateCardNodesList(groups);
+
+function generateUniqueIdForNodes(nodeList) {
+    
+}
+
 
 
 //group 4 group 6 group 5
@@ -301,7 +388,10 @@ function getPathAndUrlsArrayfromAnchors() {
             filter(x=>x.nodes.length>0);
 
     });
-    console.log(groupedByPath);
+    //console.log(groupedByPath);
+    pathsWithClusters.forEach(function(group,pos) {
+        group.pos=pos;
+    }, this);
     return pathsWithClusters;
 
 
@@ -448,7 +538,7 @@ function findCardsSingle(obj,pos) {
             {
                 comonCard=findCard(nodeMain,node2);
                 if(comonCard) {							
-                    nodeMain.Card.push(comonCard);
+                    //nodeMain.Card.push(comonCard);
                     pseudoNode.Card.push(comonCard);
                 }
                 else {
@@ -470,7 +560,7 @@ function composeCardSingle(group,pos) {
     {
         //get array of all cards in group
         var CardArray=[];
-        CardArray=group.nodes.reduce(function(prev, next, i, a) {//HACK
+        CardArray=groupsArray[pos].nodes.reduce(function(prev, next, i, a) {//HACK
             if(typeof(prev.Card)!=="undefined")
                 prev=prev.Card;
             return prev.concat(next.Card);
@@ -518,14 +608,14 @@ function cardEl(group,pos) {
             cardNode=cardNode.parentNode;
         }
 
-       //node=node.cloneNode(); //trying to serve connection here
-
-        node.cardNode=cardNode;
+        //node.cardNode=cardNode;
         groupsArray[pos].nodes[index].cardNode=cardNode;
+        /*
         node.cardNode.id = "cardId_"+pos+"_"+index;  
 		node.cardNode.className+= " card_class_group_"+pos;  
         node.cardNode.style.border="6px dashed #CC0";
-        node.cardNode.style['background-color']=bgColor;               
+        node.cardNode.style['background-color']=bgColor;      
+        */         
         
  
     });    
