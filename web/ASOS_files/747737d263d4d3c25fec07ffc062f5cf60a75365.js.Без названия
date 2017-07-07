@@ -1,0 +1,9 @@
+(function(){
+    var bt_today = new Date();
+    bt_today.setMonth(bt_today.getMonth()+1);
+    if(bt_parameter("pubref") != ""){
+        document.cookie = "asosPubref="+bt_parameter("pubref")+"; domain="+location.hostname.replace(/[a-z]+./,".")+"; path=/; expires="+bt_today.toGMTString()+";";
+    }else if(location.search.indexOf("pubref=")>-1){
+        document.cookie = "asosPubref="+location.search.match(/pubref=[0-9]+/)[0].replace("pubref=","")+"; domain="+location.hostname.replace(/[a-z]+./,".")+"; path=/; expires="+bt_today.toGMTString()+";";
+    }
+})();
