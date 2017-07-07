@@ -48,7 +48,6 @@ var URIQuery;
 (function () {
 
     //// HELPER FUNCTIONS /////
-  	  console.log("here3");
 
     // RFC3986 §5.2.3 (Merge Paths)
     function merge(base, rel_path) {
@@ -70,7 +69,6 @@ var URIQuery;
             return "";
         }
         // Remove any single dots
-			  console.log("here4");
 
         var newpath = path.replace(/\/\.\//g, '/');
         // Remove any trailing single dots.

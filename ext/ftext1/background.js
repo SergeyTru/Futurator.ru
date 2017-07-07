@@ -74,7 +74,7 @@ Object.prototype.addToKey = function (key, value) {
 };
 
 function log(obj) {
-    debug = true;
+    debug = false;
     if (debug) {
         console.log(obj);
     }
@@ -114,13 +114,151 @@ function getUrlWithoutHash(href) {
 */
 console.log("*************** FTN START **************");
 var groups = getPathAndUrlsArrayfromAnchors();
+
 //debugNbeautifyPathsWithClustersColors(groups); 
 //groups=groups.splice(0,1);
 
 //log(groups);
 //log(debugNbeautifyPathsWithClusters(groups));
 
+//problem with bash - gr 53(quotes)/56(sux)/
+/*
+gr 53 - quotes - card OK
+gr 56 - sux - card not OK (to small)
+*/
 setCards(groups);
+
+console.log(groups);
+
+//compareCards(groups[4],groups[6]);
+
+function compareCards(groupA,groupB) {
+    var equality=false;
+    groupA.nodes.forEach(function(nodeA) {
+        groupB.nodes.forEach(function(nodeB) {
+            if(nodeA.cardNode==nodeB.cardNode) 
+            {
+                //console.log("Card node equality");
+                //console.log(nodeA.cardNode);
+                //return nodeA.cardNode; //aka true                
+                equality=true;
+                return true;
+            }
+        }, this);
+
+    }, this);
+
+    return equality;
+
+}
+
+//Hip1 - we can use pathToCard to sort groups by Card
+//Failed - there are too many equal strings pathToCard which are separate cards
+
+function getGroupsByCard(groupList) {
+
+
+    var byCards=[];
+    groupList.forEach(function(group) {
+        if(!byCards[group.pathToCard])
+            byCards[group.pathToCard]=[];
+        byCards[group.pathToCard].push(group);
+    }, this);
+
+    console.log(byCards);
+    
+    return byCards;
+}
+
+
+//Hip2 - if even one Card from each group has CardNodeEquality this can be CardGroup (with longest group as seed)
+generateCardNodesList(groups);
+
+function generateCardNodesList(groupList) {
+    var cardNodesListArray=[];
+
+
+
+    groupList.forEach(function(groupA,indexA) {
+
+        newCardNodeNumber=cardNodesListArray.length++;                    
+        if(!cardNodesListArray[newCardNodeNumber])
+            cardNodesListArray[newCardNodeNumber]=[];
+
+        groupList.forEach(function(groupB,indexB) {
+            if(indexA>=indexB)
+                return false;
+
+            //console.log(indexA+"/"+indexB); //- all with all visial test
+            var hasSameCards=compareCards(groupA,groupB);
+            if(hasSameCards) {
+                groupA.nodes.forEach(function(nodeA) {
+                    groupB.nodes.forEach(function(nodeB) {
+                        if(nodeA.cardNode==nodeB.cardNode)  // && nodeA!=nodeB
+                        {
+                            cardNodesListArray[newCardNodeNumber].push(nodeA);
+                            cardNodesListArray[newCardNodeNumber].push(nodeB);
+                        }
+                    }, this);
+
+                }, this);                                
+            }
+
+        }, this);
+
+    }, this);
+
+    console.log(cardNodesListArray);
+
+    //store by card
+    var cardNodesListByCard=[];
+    cardNodesListArray.forEach(function(cardNodesList) {
+            cardNodesList.forEach(function(node) {                
+            var cardID=node.cardNode.id;
+
+            if(!cardNodesListByCard[cardID])
+                cardNodesListByCard[cardID]=[];
+            //if(!(node in cardNodesListByCard[cardID]))  {
+            if(!nodeInList(node,cardNodesListByCard[cardID])) {    
+                cardNodesListByCard[cardID].push(node);
+            } else {
+                console.log("Node already here");
+            }
+
+
+            }, this);
+            
+    }, this);
+
+
+
+    console.log(cardNodesListByCard);
+
+
+
+    return cardNodesListByCard;
+
+}
+
+
+function nodeInList(node,nodeList) {
+    var result=false;
+
+    nodeList.forEach(function(el) {
+        if(el==node)
+            {
+                result=true;
+                return true;
+            }
+    }, this);
+    return result;
+}
+
+//var byCards=getGroupsByCard(groups);
+
+
+//group 4 group 6 group 5
+
 /*
 
 
@@ -381,7 +519,7 @@ function logCards(group) {
     });
 }
 
-
+ 
 function setCardImg(group) {
     var cards=[];
     var imgs=[];

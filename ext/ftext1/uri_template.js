@@ -3,12 +3,11 @@
 // Note: this code does not handle escapes like "%DE%DA".
 //       You need to handle them before this code
 
-function UriTemplate(protocol, authority, path, params,flags) {
+function UriTemplate(protocol, authority, path, params) {
   this.protocol = protocol
   this.authority = authority
   this.path = path
   this.params = params
-  this.flag = flags
 }
 
 UriTemplate.equals = function(a, b) {
@@ -40,20 +39,15 @@ UriTemplate.prototype.toString = function() {
 };
 
 UriTemplate.prototype.toRegexp = function() {
-  var regFuzzy=true;
-  var limiter="+";
-  if(regFuzzy)
-    limiter="*";
-
   //regexp is not fully functional: js regexp does not handle unicode
-  var replacer = function(match, p1) {
+  var replacer = function(match, p1, p2) {
     p1 = p1.toUpperCase();
     if (p1 === 'N')
-      return "\\d"+limiter;
+      return "\\d+";
     if (p1 === 'T')
-      return "[\\w\\+А-Яа-я]"+limiter;
+      return "[\\w\\+А-Яа-я" + p2 + "]+";
     if (p1 === '/')
-      return "[\\wА-Яа-я/]"+limiter;
+      return "[\\wА-Яа-я/]+";
     if (p1 === '*')
       return ".*";
     throw "Unhandled symbol " + match;
@@ -61,7 +55,7 @@ UriTemplate.prototype.toRegexp = function() {
 
   var result = this.toString()
     .replace(/[.+?^$()|[\]\\]/g, "\\$&")
-    .replace(/{(.)}/g, replacer);
+    .replace(/{(.)([-_]*)}/g, replacer);
   var idx = result.indexOf('?');
   if (idx >= 0)
     return result.slice(0, idx+1) + '(&?' + result.slice(idx+1).split('&').join("|&?") + ')+';
@@ -103,9 +97,7 @@ var templateForUris = function(url1, url2) {
 
   if (!textEqualsNoCase(url1.getScheme(), url2.getScheme()))
     return;
-  //if links are from different domains we can do nothing
-  if(url1.getAuthority()!==url2.getAuthority())
-	  return false;
+
   function textEqualsNoCase(text1, text2) {
     if (text1 === undefined)
       return text2 === undefined
@@ -119,6 +111,23 @@ var templateForUris = function(url1, url2) {
     var res1 = cond(val1);
     var res2 = cond(val2);
     return (res1 && res2)? forTrue : (res1 || res2)? undefined : forFalse;
+  }
+
+  function generateVaryText(parts1, parts2) {
+    let hasSub = false;
+    let hasSlash = false;
+    parts1.concat(parts2).forEach(function(part) {
+      if (part.includes("-"))
+        hasSlash = true;
+      if (part.includes("_"))
+        hasSub = true;
+    });
+    let result = "{T";
+    if (hasSub)
+      result += "_";
+    if (hasSlash)
+      result += "-";
+    return result + "}";
   }
 
   //init function should give us reversed array
@@ -162,7 +171,7 @@ var templateForUris = function(url1, url2) {
       var curStart = 0;
       var curClass = classFor(path.charAt(0));
       for (var i = 1; i < path.length; ++i) {
-        if (curClass(path.charAt(i)))
+        if (curClass !== isDivider && curClass(path.charAt(i)))
           continue;
         result.push(path.slice(curStart, i));
         curStart = i;
@@ -176,6 +185,7 @@ var templateForUris = function(url1, url2) {
 
     function joinTextParts(parts1, parts2) {
       var result = [];
+      var actualLen = 0;
       var minLen = Math.min(parts1.length, parts2.length);
       for (var i = 0; i < minLen; ++i) {
         var p1 = parts1[i];
@@ -187,6 +197,7 @@ var templateForUris = function(url1, url2) {
         if (cl === isDivider ||
           p1.toUpperCase() === p2.toUpperCase()) {
           result.push(p1);
+          actualLen = result.length;
         }
         else if (cl === isNumber)
           result.push("{N}");
@@ -195,11 +206,16 @@ var templateForUris = function(url1, url2) {
         else
           throw "Unknown class";
       }
-      return {result: result, handled: i, hasUnhandled: i < parts1.length || i < parts2.length};
+      var hasUnhandled = i < parts1.length || i < parts2.length;
+      if (hasUnhandled) {
+        result = result.slice(0, actualLen);
+        i = actualLen;
+      }
+      return {result: result, handled: i, hasUnhandled: hasUnhandled};
     }
 
     return merge(part1, part2, splitTextPart, joinTextParts,
-      (x, y) => sameForBoth(x, y, item => item.length > 0, ["{T}"], []))
+      (x, y) => sameForBoth(x, y, item => item.length > 0, [generateVaryText(x, y)], []))
   }
 
   var auth1 = url1.getAuthority();
@@ -212,13 +228,18 @@ var templateForUris = function(url1, url2) {
   else
     return;
 
-  if (textEqualsNoCase(auth1, auth2))
+  var urlsIsSame = true;
+  if (textEqualsNoCase(auth1, auth2)) {
     auth = url1.getAuthority()
-  else
+  } else {
     auth = (function(auth1, auth2) {
       var ps1 = auth1.indexOf('.');
       var ps2 = auth2.indexOf('.');
-      if (!textEqualsNoCase(auth1.slice(ps1), auth2.slice(ps2)))
+      var substr1 = auth1.slice(ps1);
+      var substr2 = auth2.slice(ps2);
+      //allow subdomain variations (like cdn), but 2nd level domain should be the same
+      if (!textEqualsNoCase(substr1, substr2) || 
+          substr1.lastIndexOf('.') <= 0 || substr2.lastIndexOf('.') <= 0)
         return;
 
       var result = templateForTextPart(auth1.slice(0, ps1), auth2.slice(0, ps2));
@@ -226,12 +247,14 @@ var templateForUris = function(url1, url2) {
         result = result.join("");
       return result + auth1.slice(ps1);
     })(url1.getAuthority(), url2.getAuthority());
+    urlsIsSame = false;
+  }
   if (auth === undefined)
     return;
   var query;
-  if (textEqualsNoCase(url1.getQuery(), url2.getQuery()))
+  if (textEqualsNoCase(url1.getQuery(), url2.getQuery())) {
     query = url1.getQuery()
-  else
+  } else {
     query = (function(query1, query2) {
       if (query1 == null && query2 == null)
         return query1;
@@ -266,25 +289,35 @@ var templateForUris = function(url1, url2) {
       if (result.length > 1)
         return result.slice(1);
     })(url1.getQuery(), url2.getQuery());
+    urlsIsSame = false;
+  }
   if (query === undefined)
     return;
 
   var path1 = url1.getPath();
   var path2 = url2.getPath();
-  if (path1 === null && path2 === null || textEqualsNoCase(path1, path2))
-    return new UriTemplate(url1.getScheme(), auth, path1, query);
+  if (path1 === null)
+    path1 = '/';
+  if (path2 === null)
+    path2 = '/';
+  if (textEqualsNoCase(path1, path2)) {
+    if (urlsIsSame)
+      return undefined;
+    else
+      return new UriTemplate(url1.getScheme(), auth, url1.getPath(), query);
+  }
 
   function reversedPathParts(path) {
     if (path.indexOf('{/}') >= 0)
       throw "not implemented for templates"; //invalid path?
-	//if(path=="/")
-	//	return "body > a";
-	
-    return path.match(/[^\/]+/g).reverse();
+    if (path !== null)
+      return (path.match(/[^\/]+/g) || []).reverse();
+    else
+      return [];
   }
 
   var handleVaryPathPart = function(center1, center2) {
-    return sameForBoth(center1, center2, x => x.length > 0, ['{/}'], ['{T}']);
+    return sameForBoth(center1, center2, x => x.length > 0, ['{/}'], [generateVaryText(center1, center2)]);
   }
 
   function templateForPathPart(parts1, parts2) {
@@ -313,15 +346,5 @@ var templateForUris = function(url1, url2) {
     pathParts = '/' + pathParts;
   if (path1.endsWith('/') && path2.endsWith('/'))
     pathParts += '/';
-
-  var flags=null;
-  if( (
-      (path1.match(/\d\..*$/)!==null) && 
-      (path2.match(/\d\..*$/)===null)
-    ) || (
-      (path2.match(/\d\..*$/)!==null) &&  
-      (path1.match(/\d\..*$/)===null)
-      )  
-    ) flags={fuzzyNumberEnd:true};
-  return new UriTemplate(url1.getScheme(), auth, pathParts, query,flags);
+  return new UriTemplate(url1.getScheme(), auth, pathParts, query);
 }

@@ -112,15 +112,152 @@ function getUrlWithoutHash(href) {
     - для каждой группы выбираем из Списка самого красивого (с коротким путём) родителя
 
 */
-
+console.log("*************** FTN START **************");
 var groups = getPathAndUrlsArrayfromAnchors();
+
 //debugNbeautifyPathsWithClustersColors(groups); 
 //groups=groups.splice(0,1);
 
 //log(groups);
 //log(debugNbeautifyPathsWithClusters(groups));
 
+//problem with bash - gr 53(quotes)/56(sux)/
+/*
+gr 53 - quotes - card OK
+gr 56 - sux - card not OK (to small)
+*/
 setCards(groups);
+
+console.log(groups);
+
+//compareCards(groups[4],groups[6]);
+function compareCards(groupA,groupB) {
+    var equality=false;
+    groupA.nodes.forEach(function(nodeA) {
+        groupB.nodes.forEach(function(nodeB) {
+            if(nodeA.cardNode==nodeB.cardNode) 
+            {
+                //console.log("Card node equality");
+                //console.log(nodeA.cardNode);
+                //return nodeA.cardNode; //aka true                
+                equality=true;
+                return true;
+            }
+        }, this);
+
+    }, this);
+
+    return equality;
+
+}
+
+//Hip1 - we can use pathToCard to sort groups by Card
+//Failed - there are too many equal strings pathToCard which are separate cards
+
+function getGroupsByCard(groupList) {
+
+
+    var byCards=[];
+    groupList.forEach(function(group) {
+        if(!byCards[group.pathToCard])
+            byCards[group.pathToCard]=[];
+        byCards[group.pathToCard].push(group);
+    }, this);
+
+    console.log(byCards);
+    
+    return byCards;
+}
+
+
+//Hip2 - if even one Card from each group has CardNodeEquality this can be CardGroup (with longest group as seed)
+generateCardNodesList(groups);
+
+function generateCardNodesList(groupList) {
+    var cardNodesListArray=[];
+
+
+
+    groupList.forEach(function(groupA,indexA) {
+
+        newCardNodeNumber=cardNodesListArray.length++;                    
+        if(!cardNodesListArray[newCardNodeNumber])
+            cardNodesListArray[newCardNodeNumber]=[];
+
+        groupList.forEach(function(groupB,indexB) {
+            if(indexA>=indexB)
+                return false;
+
+            //console.log(indexA+"/"+indexB); //- all with all visial test
+            var hasSameCards=compareCards(groupA,groupB);
+            if(hasSameCards) {
+                groupA.nodes.forEach(function(nodeA) {
+                    groupB.nodes.forEach(function(nodeB) {
+                        if(nodeA.cardNode==nodeB.cardNode)  // && nodeA!=nodeB
+                        {
+                            cardNodesListArray[newCardNodeNumber].push(nodeA);
+                            cardNodesListArray[newCardNodeNumber].push(nodeB);
+                        }
+                    }, this);
+
+                }, this);                                
+            }
+
+        }, this);
+
+    }, this);
+
+    console.log(cardNodesListArray);
+
+    //store by card
+    var cardNodesListByCard=[];
+    cardNodesListArray.forEach(function(cardNodesList) {
+            cardNodesList.forEach(function(node) {                
+            var cardID=node.cardNode.id;
+
+            if(!cardNodesListByCard[cardID])
+                cardNodesListByCard[cardID]=[];
+            //if(!(node in cardNodesListByCard[cardID]))  {
+            if(!nodeInList(node,cardNodesListByCard[cardID])) {    
+                cardNodesListByCard[cardID].push(node);
+            } else {
+                console.log("Node already here");
+            }
+
+
+            }, this);
+            
+    }, this);
+
+
+
+    console.log(cardNodesListByCard);
+
+
+
+    return cardNodesListByCard;
+
+}
+
+
+function nodeInList(node,nodeList) {
+    var result=false;
+
+    nodeList.forEach(function(el) {
+        if(el==node)
+            {
+                result=true;
+                return true;
+            }
+    }, this);
+    return result;
+}
+
+//var byCards=getGroupsByCard(groups);
+
+
+//group 4 group 6 group 5
+
 /*
 
 
@@ -162,7 +299,7 @@ function getPathAndUrlsArrayfromAnchors() {
             filter(x=>x.nodes.length>0);
 
     });
-    
+    console.log(groupedByPath);
     return pathsWithClusters;
 
 
@@ -250,14 +387,25 @@ function debugNbeautifyPathsWithClusters(pathsWithClusters) {
 
 function setCards(groups) {
     groups.forEach((group, pos) => {
-		//if(pos==2) { 
+		//if(pos==56 || pos==54 || pos==55 || pos==56 || pos==57) { 
+        if(pos!=57) {             
+            //Работаю с карточками, мы изменяем их и уже в изменённых местах (нодах), так что если одна ссылка оказывается в другой группе - она перезаписывается
+            /*
+            Проблема в том, что в идеале - в каждой группе хранится независимая копия ноды
+            Но клонирование элемента лишает его parents
+            А на данный момент, добавляя элементу свойства мы, находя его в другой группе,
+            эти свойства перезаписываем
+
+            
+            */
+        //if(1) {
 		
 			findCardsSingle(group);
 
 			composeCardSingle(group);
 
 			cardEl(group,pos);        
-		//}
+		}
     });	
 }
 
@@ -348,10 +496,16 @@ function cardEl(group,pos) {
     var groupwayLength=group.path.split(">").length;
 
     group.nodes.forEach(function(node,index){
+        
+
+
         var cardNode=node;
         for(var i=0; i<groupwayLength-cardWayLength; i++) {
             cardNode=cardNode.parentNode;
         }
+
+       //node=node.cloneNode(); //trying to serve connection here
+
         node.cardNode=cardNode;
        
         node.cardNode.id = "cardId_"+pos+"_"+index;  
@@ -381,7 +535,7 @@ function logCards(group) {
     });
 }
 
-
+ 
 function setCardImg(group) {
     var cards=[];
     var imgs=[];
