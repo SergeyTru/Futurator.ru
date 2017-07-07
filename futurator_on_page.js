@@ -524,8 +524,10 @@ function findCard(nodeMain,node2) {//check if nodeMain===node2 before launch
 
 
 function findCardsSingle(obj,pos) {
-    if(obj.nodes.length<2) 
+    if(obj.nodes.length<2) {
+        groupsArray[pos].nodes.push({"Card":[]});
         return false;
+    }
     var saveNodes=[];
     obj.nodes.forEach((nodeMain,i) => {
         
