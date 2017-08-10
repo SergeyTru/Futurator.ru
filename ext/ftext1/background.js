@@ -128,7 +128,7 @@ var groupsArray=[];
 gr 53 - quotes - card OK
 gr 56 - sux - card not OK (to small)
 */
-setCards(groups);
+//setCards(groups);
 
 console.log(groups);
 
@@ -339,7 +339,7 @@ function nodeInList(node,nodeList) {
     return result;
 }
 
-var byCards=generateCardNodesList(groups);
+//var byCards=generateCardNodesList(groups);
 
  
  
