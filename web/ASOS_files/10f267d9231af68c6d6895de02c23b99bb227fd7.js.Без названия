@@ -1,7 +1,0 @@
-(function(){
-    var bt_today = new Date();
-    bt_today.setMonth(bt_today.getMonth()+1);
-    if(bt_parameter("MID") != ""){
-        document.cookie = "asosLinkshareMID="+bt_parameter("MID")+"; domain="+location.hostname.replace(/[a-z]+./,".")+"; path=/; expires="+bt_today.toGMTString()+";";
-	}
-})();
