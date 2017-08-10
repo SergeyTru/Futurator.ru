@@ -227,6 +227,15 @@ function generateCardNodesList(groupList) {
                             nodeA.cardNode=tmpNodeA.cardNode;
                             nodeB.cardNode=tmpNodeB.cardNode;
 
+                            //dangerous. Let's hope we do not overwrite anything
+                            nodeA.path=groups[groupA.pos].path;
+                            nodeA.urlClusterText=groups[groupA.pos].urlClusterText;
+                            nodeA.urlTemplate=groups[groupA.pos].urlTemplate;
+
+                            nodeB.path=groups[groupB.pos].path;
+                            nodeB.urlClusterText=groups[groupB.pos].urlClusterText;
+                            nodeB.urlTemplate=groups[groupB.pos].urlTemplate;            
+
                             cardNodesListArray[newCardNodeNumber].push(nodeA);
                             cardNodesListArray[newCardNodeNumber].push(nodeB);
                         }
@@ -261,29 +270,22 @@ function generateCardNodesList(groupList) {
     cardNodesListArray.forEach(function(cardNodesList) {
         cardNodesList.forEach(function(node) {
             var curCardNode=node.cardNode;
-            var trueIndex=false;
+            var index=cardNodesListByCard.findIndex(el=>el.cardNode==curCardNode);
 
-            cardNodesListByCard.forEach((CardGlobalEl,index)=>{
-                if(CardGlobalEl.cardNode==curCardNode)
-                    trueIndex=index;
-            });
-                        
-            
-
-            if(trueIndex===false) { //no element with such node
+            if(index<0) { //no element with such node
                 tmpGlobalCardEl={
                 "cardNode":curCardNode,
                 "nodesInCard":[]
                 };
-                tmpGlobalCardEl.nodesInCard.push(node); //Нода не настоящая!
+                tmpGlobalCardEl.nodesInCard.push(node); 
             
                 cardNodesListByCard.push(tmpGlobalCardEl);
             } else {
-                var isNodeSaved=cardNodesListByCard[trueIndex].nodesInCard.some(savedNode=>{
+                var isNodeSaved=cardNodesListByCard[index].nodesInCard.some(savedNode=>{
                     return savedNode===node;
                 });
                 if(!isNodeSaved)
-                    cardNodesListByCard[trueIndex].nodesInCard.push(node); //Нода не настоящая!
+                    cardNodesListByCard[index].nodesInCard.push(node); 
             }
 
 
@@ -339,9 +341,8 @@ function nodeInList(node,nodeList) {
 
 var byCards=generateCardNodesList(groups);
 
-function generateUniqueIdForNodes(nodeList) {
-    
-}
+ 
+ 
 
 
 
