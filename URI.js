@@ -48,7 +48,7 @@ var URIQuery;
 (function () {
 
     //// HELPER FUNCTIONS /////
-  
+
     // RFC3986 §5.2.3 (Merge Paths)
     function merge(base, rel_path) {
         var dirname = /^(.*)\//;

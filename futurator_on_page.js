@@ -1,13 +1,14 @@
 function sortUnique(arr, equality) {
-    if (!equality)
-        equality = function (a, b) { return a === b; };
+    if (!equality) {
+      equality = function(a, b) { return a === b; };
+    }
 
     //http://stackoverflow.com/a/4833835
     if (arr.length === 0) return arr;
     arr = arr.sort();
-    var ret = [arr[0]];
+    let ret = [arr[0]];
     for (var i = 1; i < arr.length; i++) { // start loop at 1 as element 0 can never be a duplicate
-        if (!equality(arr[i - 1], arr[i])) {
+        if (!equality(arr[i-1], arr[i])) {
             ret.push(arr[i]);
         }
     }
@@ -15,40 +16,47 @@ function sortUnique(arr, equality) {
 }
 
 function findUriClusters(links) {
-    links = links.map(link => { 
-        return getUrlWithoutHash(link);
-    }).filter(x => x.length > 0);
-    var refs = sortUnique(links).map(a => new URI(a));
-    var clusters = [];
-    for (var i = refs.length - 1; i > 0; --i)
-        for (var j = i - 1; j >= 0; --j) {
-            var cluster = templateForUris(refs[i], refs[j]);
-            if (cluster)
-                clusters.push(cluster);
-        }
-    return sortUnique(clusters, UriTemplate.equals);
+  let refs = sortUnique(links).map(a=>new URI(a));
+  let clusters = [];
+  for (let i = refs.length - 1; i > 0; --i)
+    for (let j = i - 1; j >= 0; --j) {
+      let cluster = templateForUris(refs[i], refs[j]);
+      if (cluster) {
+        clusters.push(cluster);
+      }
+    }
+  return sortUnique(clusters, UriTemplate.equals);
 }
 
-function clusterize() {
-    var linkClusters = findUriClusters([].slice.call(document.links).map(a => a.href));
-    var imgClusters = findUriClusters([].slice.call(document.images).map(img => img.src));
+function getCSSPath(elem, withClasses) {
+  //http://stackoverflow.com/questions/1648412/how-to-generate-css-path-with-javascript-or-jquery
+  if (elem.id) {
+    return elem.id.split(' ').filter(x => x.length > 0).map(x => '#' + x).join('');
+  }
 
-    console.log("Links:");
-    linkClusters.forEach(clust => console.log(clust.toString()));
-    console.log("Images:");
-    imgClusters.forEach(clust => console.log(clust.toString()));
+  if (elem.tagName == "BODY") {
+    return '';
+  }
+
+  let path = getCSSPath(elem.parentNode) + ' ' + elem.tagName;
+  if (withClasses && elem.className)
+    path = path + ' ' + elem.tagName + elem.className.split(' ').filter(x => x.length > 0).map(x => '.' + x).join('');
+
+  return path;
 }
 
-//clusterize();
-
-/* DomPath from stackoverflow http://stackoverflow.com/a/16742828 */
+/** DomPath from stackoverflow http://stackoverflow.com/a/16742828 */
 function getDomPath(el) {
     if (!el) {
         return false;
     }
-    var stack = [];
+    let stack = [];
     while (el.parentNode !== null) {
-        var nodeName = el.nodeName.toLowerCase();
+        let nodeName = el.nodeName.toLowerCase();
+        /*
+        if(el.className)
+            nodeName+="."+el.className;
+        */
         stack.unshift(nodeName);
         el = el.parentNode;
         if (el.nodeType === 11) { // for shadow dom
@@ -59,95 +67,124 @@ function getDomPath(el) {
     return stack.join(' > ');
 }
 
-Object.prototype.addToKey = function (key, value) {
-    if (key in this)
-        this[key].push(value);
-    else
-        this[key] = [value];
-};
+/** Convert objects in array to map
+    Example:
+      data = [{"name": "Chris", "surname": "Doe"}, {"name": "Chris", "surname": "Ronnov"}, {"name": "Homer", "surname": "Simpson"}]
+      keyFunction = obj=>obj.name
+      dataFunction = obj=>obj.surname
+      result object: {"Chris": ["Doe", "Ronnov"], "Homer": ["Simpson"]}
+ */
+function groupByKey(data, keyFunction, dataFunction) {
+  if (keyFunction === undefined) {
+    keyFunction = any => any;
+  }
+  if (dataFunction === undefined) {
+    dataFunction = any => any;
+  }
+  resultObject = {};
+  data.forEach(item => {
+    pushProperty(resultObject, keyFunction(item), dataFunction(item));
+  });
+  return resultObject;
+}
 
-function log(obj) {
-    debug = true;
-    if (debug) {
-        console.log(obj);
+function pushProperty(obj, key, value) {
+    if (key in resultObject) {
+        obj[key].push(value);
+    } else {
+        obj[key] = [value];
     }
 }
 
-function splitByClusters(clusters,values,path) {
-        var tmpArray=[];
-        clusters.forEach((cluster) => {
-            var expr = '^' + cluster.toRegexp() + "$";
-            var nodes = values.filter(awi => awi.url.match(expr)).map(awi => awi.anchor);
-
-            tmpArray.push({ 
-                path: path, 
-                nodes: nodes, 
-                urlTemplate: cluster,
-                urlClusterText:cluster.toString() 
-            });
-            
-        });    
-        return tmpArray;
-
-}
-
 function getUrlWithoutHash(href) {
-    var idx = href.indexOf('#');
+    let idx = href.indexOf('#');
     return (idx >= 0 ? href.slice(0, idx) : href);
 }
 
-
-function getPathAndUrlsArrayfromAnchors() {
-    var groupedByPath = {};
-    var pathsWithClusters = [];
-
-    var anchors = Array.prototype.slice.call(document.links);
-
-    var anchorsWithInfo = anchors.map(a => {
-        return { anchor: a, url: getUrlWithoutHash(a.href), path: getDomPath(a) };
-    }).
-        filter( x => x.url.length > 0 );
-
-    log(anchorsWithInfo);
-
-    anchorsWithInfo.forEach((obj) => {
-        groupedByPath.addToKey(obj.path, obj);
-    });
-
-    log(groupedByPath);
-
-    Object.keys(groupedByPath).forEach((path) => {
-        var values = groupedByPath[path];
-        var links = values.map((a) => { return a.url; });
-        var clusters = findUriClusters(links);
-        pathsWithClusters=pathsWithClusters.concat(splitByClusters(clusters,values,path)).
-            filter(x=>x.nodes.length>0);
-
-    });
-    
-    return pathsWithClusters;
-
-
-
+function getRootNodes(nodes) {
+  if (nodes.length < 2) {
+    throw "getRootNodes requires at least 2 nodes";
+  }
+  //nodes should have same depth
+  let parents = nodes.map(x => ({node: x.node.parentNode, url: x.url, path: x.path}));
+  for (let i = parents.length - 1; i > 0; --i) {
+    for (let j = i - 1; j >= 0; --j) {
+      if (parents[i].node === parents[j].node && parents[i].url !== parents[j].url) {
+        return nodes;
+      }
+    }
+  }
+  return getRootNodes(parents);
 }
 
-function debugNbeautifyPathsWithClusters(pathsWithClusters) {
-    var resultObj={};
-    pathsWithClusters.forEach((obj) => {
-            resultObj.addToKey( "path: " + obj.path + " | cluster: " + obj.urlTemplate.toString(), obj);
+function findCardsRoots() {
+  let anchorInfos = [].slice.call(document.links)
+      .map(a => ({ node: a, url: getUrlWithoutHash(a.href), path: getDomPath(a) }))
+      .filter( x => x.url.length > 0 );
+  let anchorsByPath = groupByKey(anchorInfos, a => a.path);
+  let roots = [];
+  for (key in anchorsByPath) {
+    let clusters = findUriClusters(anchorsByPath[key].map(awi => awi.url));
+    clusters.forEach(cluster => {
+        let expr = '^' + cluster.toRegexp() + "$";
+        let nodesByCluster = anchorsByPath[key].filter(awi => awi.url.match(expr));
+        if (nodesByCluster.length > 1) {
+          let rootNodes = getRootNodes(nodesByCluster);
+          roots.push(rootNodes.map(x => x.node));
+        } else {
+          console.log("Cluster " + cluster + " lost nodes");
+        }
     });
-
-    Object.keys(resultObj).forEach((key) => {
-        var item = resultObj[key][0];
-        resultObj[key] = item.nodes.map(node => {
-            return { node: node, urlTemplate: item.urlTemplate,  path: item.path, 
-                urlClusterText:item.urlTemplate.toString()};
-        });
-    });
-    return resultObj;
+  }
+  return roots;
 }
 
-var result = getPathAndUrlsArrayfromAnchors();
-log(result);
-log(debugNbeautifyPathsWithClusters(result));
+function arrayIncludes(bigArray, smallArray) {
+  return !smallArray.some(sm => !bigArray.some(bg => sm === bg));
+}
 
+function haveSame(array, elem, tillIndex) {
+  let idx = tillIndex;
+  while (--idx >= 0) {
+    if (elem.length == array[idx].length && arrayIncludes(elem, array[idx])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function includesInOther(array, elem, idxToExclude) {
+  return array.find((other, idx) =>
+      idxToExclude != idx &&
+      other.length > elem.length &&
+      arrayIncludes(other, elem)
+    ) != null;
+}
+
+function sizeOfList(roots) {
+  return roots
+    .map(item => item.offsetWidth * item.offsetHeight)
+    .reduce((a, b) => a+b, 0);
+}
+
+function findListsInPage() {
+  let roots = findCardsRoots();
+  console.log(roots);
+  //remove duplicates and sublists
+  roots = roots.filter((root, idx) => !haveSame(roots, root, idx) && !includesInOther(roots, root, idx));
+  console.log(roots);
+  console.log(roots.map(x => sizeOfList(x)));
+  roots = roots
+       .map(list => ({"list": list, "square": sizeOfList(list)}))
+       .sort((a, b) => b.square - a.square)
+       .map(shell => shell.list);
+  // roots.sort((a,b) => sizeOfList(b) - sizeOfList(a));
+  console.log(roots);
+  roots.forEach((root, idx) =>
+    root.forEach(el =>
+      el.className += (" f_list_" + idx)
+    )
+  );
+}
+
+findListsInPage();

@@ -29,8 +29,11 @@ UriTemplate.prototype.toString = function() {
   var result = "";
   if (this.protocol)
     result += textOf(this.protocol) + ":";
+  if (this.protocol || this.authority) {
+    result += "//";
+  }
   if (this.authority)
-    result += "//" + textOf(this.authority);
+    result += textOf(this.authority);
   if (this.path)
     result += textOf(this.path);
   if (this.params)
